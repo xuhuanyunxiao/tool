@@ -4,7 +4,7 @@ import sys
 
 setup(
     name="toolkits",
-    version="0.0.2",
+    version="0.0.3",
     author="XH",
     author_email="605828203.com",
     description="A Python library for application.",
