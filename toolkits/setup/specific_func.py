@@ -1,9 +1,5 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 17 14:35:07 2017
-
-@author: xh
-"""
 
 #%%
 '''
@@ -20,8 +16,8 @@ Created on Tue Oct 17 14:35:07 2017
     又按标准、三方和自己编写顺序依次排放，之间空一行。
     
 使用：
-    import Tookits  # Tookits.specific_func.contain_ch('salskdj中文')
-    from Tookits.specific_func import set_ch
+    import toolkits  # toolkits.specific_func.contain_ch('salskdj中文')
+    from toolkits.specific_func import set_ch_pd
     
 文档测试：
 def multiply(a, b):
@@ -36,6 +32,7 @@ def multiply(a, b):
 import doctest
 doctest.testmod(verbose=True)
 '''
+
 #%%
 import datetime as dt
 import re
@@ -45,13 +42,17 @@ import pandas as pd
 from pylab import mpl
 
 #%% 中文相关
-def set_ch():
+def set_ch_pd():
     '''
-    功能：设定绘图时显示中文
+    功能：设定绘图时显示中文，pandas 显示
     '''	
-    from pylab import mpl
+    # from pylab import mpl
     mpl.rcParams['font.sans-serif'] = ['FangSong'] # 指定默认字体
     mpl.rcParams['axes.unicode_minus'] = False   # 解决保存图像是负号'-'显示为方块的问题
+
+    pd.set_option('display.max_colwidth',1000) # 显示列数
+    pd.set_option('precision', 3) # 设置精度
+    pd.set_option('display.float_format', lambda x:'%.3f' %x) # 不采用科学计数法显示
 
 #
 def contain_ch(word, pattern = None):
@@ -110,64 +111,7 @@ def find_punctuation(data, pattern = None, add_punc = None, del_punc = None):
     if del_punc:
         punctuation = re.sub(del_punc,'',punctuation)
     
-    return punctuation
-
-#if punctuation:
-#    for p in list(punctuation):num = num.replace(p,'.')
-#%%  获取年份信息
-def get_year_value(index,value):
-    '''
-    Function：
-        找出出生日期的年份。如果含中文，返回np.nan
-    Arguments：
-        index -> str -- value 对应的索引值
-        value -> str -- 日期值，如 2017-10-12
-    Return: 
-        v -> str -- 年份，如 2017    
-        
-    >>> get_year_value(1,'2017-10-12')
-    '2017'
-    '''
-
-    try :
-        value = str(value)
-        if contain_ch(value):
-            v = np.nan
-        else :
-            if value == 'nan':
-                v = np.nan
-            else :
-                if len(value) < 8:
-                    if '.' in value:
-                        d = pd.TimedeltaIndex(pd.DataFrame([float(value)])[0], unit='d') + dt.datetime(1899, 12, 30)                    
-                    else :
-                        d = pd.TimedeltaIndex(pd.DataFrame([int(value)])[0], unit='d') + dt.datetime(1899, 12, 30)
-                    y = d.year[0]
-                    if 1990 < y & y < 2017:
-                        v = y
-                    else :
-                        v = np.nan
-                elif len(value) == 8:
-                    y = value[:4]
-                    if 1900 < int(y) & int(y) < 2017:
-                        v = y 
-                    else :
-                        v = np.nan                    
-                else :
-                    if value[4] == '/':
-                        v= dt.datetime.strptime(str(value), "%Y/%m/%d").year
-                    elif value[4] == '-':
-                        if ':' in value:
-                            v= dt.datetime.strptime(str(value), "%Y-%m-%d %H:%M:%S").year
-                        else :
-                            v= dt.datetime.strptime(str(value), "%Y-%m-%d").year
-                    elif value[4] == '.':
-                        v= dt.datetime.strptime(str(value), "%Y.%m.%d").year                            
-                    else :
-                        v= dt.datetime.strptime(str(value), "%Y%m%d").year
-    except Exception as e:
-        print(index,value,e)
-    return v    
+    return punctuation  
 
 #%% 获取txt文本编码信息
 def get_txt_encode(file_path):

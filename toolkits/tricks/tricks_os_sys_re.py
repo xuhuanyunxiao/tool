@@ -183,8 +183,27 @@ if __name__=="__main__":
 #sys.path[0]=
 #sys.argv[0]=D:/XH/win_to_centos7/proj_3_score/package/test2.py
 
+# 添加默认模块搜索路径
+import sys
+sys.path
+sys.path.append("c:\\")
+
+
 #%% --- 
-
-
+## basestring 问题
+try:
+    unicode = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    str = str
+    unicode = str
+    bytes = bytes
+    basestring = (str,bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    str = str
+    unicode = unicode
+    bytes = str
+    basestring = basestring
 
 

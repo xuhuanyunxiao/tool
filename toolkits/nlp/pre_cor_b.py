@@ -5,8 +5,11 @@ import re
 import jieba
 from string import digits
 
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+
 stopwords = {}
-stw = open("corpus/stop_words_cor.txt", encoding='UTF-8')
+stw = open(dir_path + "/corpus_b/stop_words_cor.txt", encoding='UTF-8')
 for ws in stw:
     ws = ws.replace("\n", "")
     ws = ws.replace("\r", "")
@@ -14,8 +17,8 @@ for ws in stw:
 stw.close()
 
 # jieba.load_userdict('corpus/company.txt')
-jieba.load_userdict('corpus/bank_dict_20180814.txt') # 合并了 user_dict.txt
-jieba.load_userdict('corpus/neg_words_20180704.txt')
+jieba.load_userdict(dir_path + '/corpus_b/bank_dict_20180814.txt') # 合并了 user_dict.txt
+jieba.load_userdict(dir_path + '/corpus_b/neg_words_20180704.txt')
 
 
 def handle_contents(l_contents):
@@ -65,7 +68,7 @@ def clear_sen(sent):
     sent = sent.replace("？", "?")
     reobj = re.compile("//(.*?)[:\s]")
     sent = reobj.sub("", sent)
-    sent = re.sub(r'[a-z]*', '', sent)
+    # sent = re.sub(r'[a-z]*', '', sent)
     return sent
 
 

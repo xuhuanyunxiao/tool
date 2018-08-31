@@ -16,8 +16,8 @@
     又按标准、三方和自己编写顺序依次排放，之间空一行。
     
 使用：
-    import Tookits  # Tookits.specific_func.contain_ch('salskdj中文')
-    from Tookits.specific_func import set_ch
+    import toolkits  # toolkits.specific_func.contain_ch('salskdj中文')
+    from toolkits.specific_func import set_ch_pd
     
 文档测试：
 def multiply(a, b):

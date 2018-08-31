@@ -18,4 +18,4 @@ There are some kind of method from parctice.
 
 
 # 3 __all__ property
-__all__ = ['nlp',"ml","setup"]
+#__all__ = ['specific_func',"cal_func"]

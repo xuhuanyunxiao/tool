@@ -1,0 +1,8 @@
+README.rst
+setup.py
+toolkits/__init__.py
+toolkits.egg-info/PKG-INFO
+toolkits.egg-info/SOURCES.txt
+toolkits.egg-info/dependency_links.txt
+toolkits.egg-info/top_level.txt
+toolkits.egg-info/zip-safe

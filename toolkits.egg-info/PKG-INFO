@@ -1,0 +1,23 @@
+Metadata-Version: 1.1
+Name: toolkits
+Version: 0.0.4
+Summary: A Python library for application.
+Home-page: https://github.com/xuhuanyunxiao/toolkits.git
+Author: XH
+Author-email: 605828203.com
+License: MIT
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Classifier: Environment :: Web Environment
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Natural Language :: Chinese
+Classifier: Operating System :: MacOS
+Classifier: Operating System :: Microsoft
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Topic :: Multimedia :: Video
+Classifier: Topic :: Internet
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Programming Language :: Python :: 3.6

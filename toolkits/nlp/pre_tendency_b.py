@@ -5,17 +5,19 @@ import re
 import jieba
 from string import digits
 
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
+
 stopwords = {}
-stw = open("corpus/stop_words_tendency.txt", encoding='UTF-8')
+stw = open(dir_path + "/corpus_b/stop_words_tendency.txt", encoding='UTF-8')
 for ws in stw:
     ws = ws.replace("\n", "")
     ws = ws.replace("\r", "")
     stopwords[ws] = 1
 stw.close()
 
-jieba.load_userdict('corpus/company.txt')
-jieba.load_userdict('corpus/user_dict.txt')
-jieba.load_userdict('corpus/bank_dict.txt')
+jieba.load_userdict(dir_path + '/corpus_b/bank_dict_20180814.txt') # 合并了 user_dict.txt
+jieba.load_userdict(dir_path + '/corpus_b/neg_words_20180704.txt')
 
 
 def handle_contents(l_contents):

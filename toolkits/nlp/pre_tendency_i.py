@@ -4,18 +4,18 @@ from __future__ import division
 import re
 import jieba
 from string import digits
+import os
+dir_path = os.path.dirname(os.path.abspath(__file__))
 
 stopwords = {}
-stw = open("corpus/stop_words_tendency.txt", encoding='UTF-8')
+stw = open(dir_path + "/corpus_i/stop_words_tendency.txt", encoding='UTF-8')
 for ws in stw:
     ws = ws.replace("\n", "")
     ws = ws.replace("\r", "")
     stopwords[ws] = 1
 stw.close()
 
-jieba.load_userdict('corpus/company.txt')
-jieba.load_userdict('corpus/user_dict.txt')
-jieba.load_userdict('corpus/bank_dict.txt')
+jieba.load_userdict(dir_path + '/corpus_i/insurance_dict_20180803.txt')
 
 
 def handle_contents(l_contents):
