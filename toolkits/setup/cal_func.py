@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Oct 17 16:37:38 2017
 
-@author: xh
-"""
 #%%
 '''
 命名规则：
@@ -20,8 +16,8 @@ Created on Tue Oct 17 16:37:38 2017
     又按标准、三方和自己编写顺序依次排放，之间空一行。
     
 使用：
-    import Tookits  # Tookits.specific_func.contain_ch('salskdj中文')
-    from Tookits.specific_func import set_ch
+    import toolkits  # toolkits.specific_func.contain_ch('salskdj中文')
+    from toolkits.specific_func import set_ch_pd
     
 文档测试：
 def multiply(a, b):
@@ -36,6 +32,7 @@ def multiply(a, b):
 import doctest
 doctest.testmod(verbose=True)
 '''
+
 #%%
 from itertools import combinations
 import time
