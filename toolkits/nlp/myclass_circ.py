@@ -301,7 +301,7 @@ class Statskeywords_cor(BaseEstimator, TransformerMixin):
         self.topk = topk
         
         self.keywords = set()
-        f = open("corpus/keywords.txt","r+", encoding='UTF-8')
+        f = open("corpus/keywords_i.txt","r+", encoding='UTF-8')
         num = 0
         for content in f:
             if num < topk:
