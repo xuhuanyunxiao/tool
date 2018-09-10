@@ -227,7 +227,7 @@ except :
     engine = create_engine(DB_CON_STR, echo=False) 
     sql.execute('show databases', engine)    
 
-# 银保监会、人寿
+# 银保监会、人寿、建行
 try:
     DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@10.31.149.216:5720/cbrc_circ?charset=utf8' 
     engine = create_engine(DB_CON_STR, echo=False)

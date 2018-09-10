@@ -21,7 +21,7 @@ class generate_keywords():
         
     def save_txt(self,save_filename):
         # save_filename = keywords.txt
-        file_path = self.dir_path + "/corpus/%s"%save_filename
+        file_path = os.path.normpath(self.dir_path + "/corpus/%s"%save_filename)
         print('file_path: ', file_path)
         f = open(file_path,"w+", encoding='UTF-8')
         for content in self.keywords:

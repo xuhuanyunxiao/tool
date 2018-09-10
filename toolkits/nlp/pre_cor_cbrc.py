@@ -72,9 +72,12 @@ def clear_sen(sent):
     return sent
 
 
-def etl(s):  # remove 标点和特殊字符
+def etl(s):  
+    # 去除标点和特殊字符
     regex = re.compile(r"[^\u4e00-\u9f5aa-zA-Z0-9]")
     s = regex.sub('', s)
+
+    # 去除字符中的数字
     remove_digits = str.maketrans('', '', digits)
     res = s.translate(remove_digits)
     return res
