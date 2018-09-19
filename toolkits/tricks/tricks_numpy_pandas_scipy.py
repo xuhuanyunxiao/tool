@@ -55,6 +55,9 @@ tuples = useful_data.columns.tolist()
 tupless = [i for i in tuples if (i[1] == value_name) |(i[0] =='年级')|(i[0] =='年龄')|(i[0] =='学段')]
 useful_data = useful_data.reindex(columns=pd.MultiIndex.from_tuples(tupless))
 
+# 插入列
+kfold_result.insert(0, '备注', '') # 第0列，列名，该列的值
+
 # 将某列设为index
 address_matrix = pd.DataFrame(address_matrix, columns = ['index','城市级别','城市名']).drop_duplicates(subset=['index']).set_index('index')
 

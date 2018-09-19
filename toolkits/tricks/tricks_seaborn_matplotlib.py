@@ -137,16 +137,6 @@ ax.set_xlabel('X')
 plt.show()
 
 
-#%% 中文相关
-def set_ch():
-    '''
-    功能：设定绘图时显示中文
-    ''' 
-    from pylab import mpl
-    mpl.rcParams['font.sans-serif'] = ['FangSong'] # 指定默认字体
-    mpl.rcParams['axes.unicode_minus'] = False   # 解决保存图像是负号'-'显示为方块的问题
-set_ch()
-
 # 图片保存
 
 
@@ -396,3 +386,46 @@ def sta_plot(data,xlabel,g,fea_name,value_name,title,filename):
     fig.suptitle(title, fontsize=18, ha='center')        
     plt.savefig(filename, bbox_inches='tight')
     plt.show()    
+
+
+# 蜂巢图
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(0)
+n = 100000
+x = np.random.standard_normal(n)
+y = 2.0 + 3.0 * x + 4.0 * np.random.standard_normal(n)
+xmin = x.min()
+xmax = x.max()
+ymin = y.min()
+ymax = y.max()
+
+fig, axs = plt.subplots(ncols=2, sharey=True, figsize=(7, 4))
+fig.subplots_adjust(hspace=0.5, left=0.07, right=0.93)
+ax = axs[0]
+hb = ax.hexbin(x, y, gridsize=50, cmap='inferno')
+ax.axis([xmin, xmax, ymin, ymax])
+ax.set_title("Hexagon binning")
+cb = fig.colorbar(hb, ax=ax)
+cb.set_label('counts')
+
+ax = axs[1]
+hb = ax.hexbin(x, y, gridsize=50, bins='log', cmap='inferno')
+ax.axis([xmin, xmax, ymin, ymax])
+ax.set_title("With a log color scale")
+cb = fig.colorbar(hb, ax=ax)
+cb.set_label('log10(N)')
+
+plt.show()
+
+
+
+
+
+
+
+
+
+
+

@@ -395,6 +395,64 @@ WHERE
     t3.id = t1.id AND t3.id = t2.doc_id
         AND DATE_FORMAT(t1.publishtime, '%Y-%m-%d') = '2018-08-24';
 
+## join
+SELECT 
+    t1.id, t2.name, t1.classify_id, t1.subject_word
+FROM
+    cbrc_circ.db_class_tree_node_keyword t1
+        LEFT JOIN
+    cbrc_circ.db_class_tree_node t2 ON t1.node_id = t2.id
+WHERE
+    t1.flag = 0 AND t1.type != 4
+        AND classify_id IN (1 , 2, 3, 4, 5, 6, 21, 27, 29);
+
+SELECT 
+    t1.type, t2.title, t3.text AS content, t2.publishtime
+FROM
+    cbrc_circ.db_docinfo_trade t1
+        LEFT JOIN
+    cbrc_circ.db_docinfo t2 ON t1.urlhash = t2.urlhash
+        LEFT JOIN
+    cbrc_circ.db_docinfo_text t3 ON t3.urlhash = t2.urlhash
+WHERE
+    t1.type = 4
+LIMIT 50
+
+SELECT 
+    DATE_FORMAT(t2.publishtime, '%Y-%m-%d') AS publishtime,
+    t1.type,
+    t3.traffic_id AS classify,
+    COUNT(t1.id) AS count
+FROM
+    cbrc_circ.db_docinfo_trade t1
+        LEFT JOIN
+    cbrc_circ.db_docinfo t2 ON t1.urlhash = t2.urlhash # t1 与 t2
+        LEFT JOIN
+    cbrc_circ.db_classify_traffic_docinfo t3 ON t2.urlhash = t3.urlhash # t2 与 t3
+WHERE
+    (DATE_FORMAT(t2.publishtime, '%Y-%m-%d') >= '2018-08-19'
+        AND DATE_FORMAT(t2.publishtime, '%Y-%m-%d') <= '2018-09-18')
+GROUP BY DATE_FORMAT(t2.publishtime, '%Y-%m-%d') , t1.type , t3.traffic_id
+ORDER BY DATE_FORMAT(t2.publishtime, '%Y-%m-%d') DESC;
+
+
+# union、 union all
+# 组合， 自动处理重合
+select nick_name
+from A
+union
+select name
+from B 
+
+# 组合， 不处理重合
+select nick_name
+from A
+union all 
+select name
+from B 
+
+
+# 其他
 SELECT 
     publishtime, COUNT(publishtime)
 FROM
@@ -407,6 +465,8 @@ SELECT count(id) FROM text_signatures.wise_web_signatures_small;
 SELECT count(id) FROM text_signatures.wise_web_signatures_middle;
 
 SELECT count(id) FROM text_signatures.wise_simi_result;
+
+
 
 
 

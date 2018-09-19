@@ -39,6 +39,7 @@ import re
 
 import numpy as np
 import pandas as pd
+
 from pylab import mpl
 
 #%% 中文相关
@@ -192,6 +193,43 @@ def get_text(folder_path, text_data, file_name):
 
 #%%
 
+def get_engine(types):
+    '''创建mysql连接'''
+
+    from sqlalchemy import create_engine
+    from pandas.io import sql
+    if types == 'circ':
+        # 保监会
+        try :
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb123@10.80.88.73:5718/pom?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False) 
+            sql.execute('show databases', engine)
+        except :
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb123@47.95.148.133:5718/pom?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False) 
+            sql.execute('show databases', engine)    
+    elif types == 'cbrc':
+        # 银监会
+        try :
+            DB_CON_STR = 'mysql+pymysql://atlas:WiseWeb123@47.93.77.228:5636/pom?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False) 
+            sql.execute('show databases', engine)
+        except :
+            DB_CON_STR = 'mysql+pymysql://atlas:WiseWeb123@10.28.205.96:5636/pom?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False) 
+            sql.execute('show databases', engine)    
+    elif types == 'cbirc':
+        # 银保监会、人寿、建行
+        try:
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@10.31.149.216:5720/cbrc_circ?charset=utf8' 
+            engine = create_engine(DB_CON_STR, echo=False)
+            cur = sql.execute('show databases', engine)
+        except :
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@39.107.203.231:5720/cbrc_circ?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False)
+            cur = sql.execute('show databases', engine)  
+    
+    return engine
 
 
 
