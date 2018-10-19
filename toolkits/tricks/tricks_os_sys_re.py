@@ -5,6 +5,29 @@ Created on Thu Oct 19 10:49:30 2017
 @author: xh
 """
 
+# 修改 logging 文件
+File "D:\software\conda\lib\logging\handlers.py", line 113, in rotate
+    os.rename(source, dest)
+# 修改前
+if not callable(self.rotator):
+    # Issue 18940: A file may not have been created if delay is True.
+    if os.path.exists(source):
+        os.rename(source, dest)
+else:
+    self.rotator(source, dest)
+
+# 修改后
+if not callable(self.rotator):
+    # Issue 18940: A file may not have been created if delay is True.
+    try :
+        if os.path.exists(source):
+            os.rename(source, dest)
+    except :
+        pass
+else:
+    self.rotator(source, dest)
+
+
 ### 
 # 在嵌套For循环中，将循环次数多的循环放在内侧，循环次数少的循环放在外侧，其性能会提高；
 # 减少循环变量的实例化，其性能也会提高。

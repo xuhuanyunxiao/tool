@@ -78,7 +78,7 @@ with pd.ExcelWriter(fea_filename) as writer:
     writer.save()
  
 
-# json
+# json  -----------------
 df = pd.DataFrame([['a', 'b'], ['c', 'd']], 
     index=['row 1', 'row 2'],
     columns=['col 1', 'col 2'])
@@ -92,15 +92,18 @@ df.to_json(orient='columns')
 df.to_json(orient='values')
 df.to_json(orient='table')
 
-# dict
+# dict  -----------------
 df.to_dict('records')
 # [{'col1': 1.0, 'col2': 0.5}, {'col1': 2.0, 'col2': 0.75}]
 # dict to DataFarme
 pd.DataFrame.from_dict(circ_stat[0], orient='index' ) 
 
-# 随机取样
+# 随机取样  -----------------
 DataFrame.sample(n=None, frac=None, replace=False, 
     weights=None, random_state=None, axis=None)
+
+# 长数据与宽数据  -----------------
+
 
 
 #%% -----------------     numpy  ----------------------

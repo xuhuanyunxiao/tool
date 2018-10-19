@@ -63,20 +63,17 @@ logger.infor("process mysql table: %s, num:%s"%(table_name, len(table_data)))
 # 写入内存数据库
 sql_sel = 'select count(id) from {0}'.format(table_name)                    
 sel_num = memory_cur.execute(sql_sel).fetchall()
-logger.infor("process memory select table: %s, num:%s"%(table_name, sel_num[0][0]))
 
 sql_truncate = 'delete from {0}'.format(table_name)
 memory_cur.execute(sql_truncate)
 memory_conn.commit()
 sel_num = memory_cur.execute(sql_sel).fetchall()
-logger.infor("process memory delete table: %s, num:%s"%(table_name, sel_num[0][0]))
 
 # 内存数据库：批量
 insert_memory_sql = "INSERT INTO {0} VALUES (?, ?, ?);".format(table_name)
 memory_cur.executemany(insert_memory_sql, table_data) # 批量插入
 memory_conn.commit()
 sel_num = memory_cur.execute(sql_sel).fetchall()
-logger.infor("process memory insert table: %s, num:%s"%(table_name, sel_num[0][0]))
 
 # 内存数据库：单条
 insert_memory_sql = "INSERT INTO {0} VALUES (?, ?, ?)".format(table_name)
@@ -97,6 +94,10 @@ db = pymysql.connect(host='47.95.148.133', user='wisedb', passwd='Wi$eWeb123',
 cursor = db.cursor()
 cursor.execute('show tables')
 cursor.fetchall()
+
+#
+from toolkits.setup import specific_func 
+engine = specific_func.get_engine('circ')
 
 # ----------------------------------
 from sqlalchemy import create_engine
@@ -137,14 +138,20 @@ sql_cmd = """CREATE TABLE EMPLOYEE (
          INCOME FLOAT )"""
 sql.execute(sql_cmd, engine)
 
-# 表内容操作
+# 表内容操作   ----------------- 
 ## 查询/获取
 sql_cmd = "SELECT * FROM mysql_mtcars WHERE am = '%d'" % (1)
 select_data = pd.read_sql(sql_cmd, engine) # 返回DataFrame
 
+## 根据多个ID查询数据
+
+
+
+
 # write data to mysql
 #pd.io.sql.to_sql(data,'tablename', engine, schema='mysql_data', if_exists='replace') 
 table_data.to_sql('tablename', engine, schema='mysql_data', if_exists='replace') 
+
 
 # 关闭连接   ----------------- 
 conn = create_engine('mysql+pymysql:user:passwd@host:port/db?charset=etf-8')
