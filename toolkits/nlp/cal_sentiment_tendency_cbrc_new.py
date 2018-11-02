@@ -118,7 +118,8 @@ def preprocess_sentences(sentences):
             continue
         
         sentence = sentence.strip()
-        words = filter(lambda word_pos: len(word_pos.word) > 0, map(clear_word, pseg.cut(sentence)))
+#        words = filter(lambda word_pos: len(word_pos.word) > 0, map(clear_word, pseg.cut(sentence)))
+        words = pseg.cut(sentence)
         
         pos_list = []
         word_list = []
@@ -138,6 +139,7 @@ def get_entity(pre_sentences, dictionarys):
     for sen_loc, [pos_list, word_list] in pre_sentences.items():            
         sentence_flag = 0
         cpns = []
+        aka_names = []
         if ('rm' not in pos_list) & ('cpn' in pos_list):   # 含 去除词 的句子需过滤掉   
             for pos, word in zip(pos_list, word_list):
                 if pos == 'cpn':  # 公司主体   
@@ -158,6 +160,7 @@ def get_entity(pre_sentences, dictionarys):
                             
                             if sentence_flag:
                                 cpns.append(dictionarys['data'][word_id])
+                                aka_names.append(word)
                                 if word not in org_loc:
                                     org_loc[word] = [dictionarys['data'][word_id][3],
                                                      {sen_loc}]
@@ -167,10 +170,10 @@ def get_entity(pre_sentences, dictionarys):
                         continue 
                       
         if len(cpns) > 0: # 符合一个主体词、两个辅助词、一个去除词的规则
-            for cpn in cpns:
+            for cpn, aka_name in zip(cpns, aka_names):
                 if cpn[2] not in repeat_id:                            
                     dict_ = {"id": cpn[0], "classify_id": cpn[1], "node_id": cpn[2], 
-                             "name": cpn[3]}
+                             "name": cpn[3], "aka_name": aka_name}
                     org_list.append(dict_)
                     repeat_id.add(cpn[2])
     return org_list, org_loc                    

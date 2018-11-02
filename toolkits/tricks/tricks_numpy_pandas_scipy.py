@@ -105,6 +105,13 @@ DataFrame.sample(n=None, frac=None, replace=False,
 # 长数据与宽数据  -----------------
 
 
+# 处理 URL 写入 Excel 问题  -----------------
+writer = pd.ExcelWriter('Q3_data/circ_Q3_tendency_result_20181018_7.xlsx',
+                        engine='xlsxwriter',
+                        options={'strings_to_urls': False})
+
+useful_data.to_excel(writer, sheet_name='Sheet1', index = False)
+writer.save()
 
 #%% -----------------     numpy  ----------------------
 import numpy as np

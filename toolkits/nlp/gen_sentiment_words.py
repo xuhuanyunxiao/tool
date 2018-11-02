@@ -9,23 +9,31 @@
     1 HowNet_sentiment： http://www.keenage.com/html/c_bulletin_2007.html
     2 台湾大学情感词典
     3 哈工大同义词词林扩展版: synonym.txt
-    3 a_level_SP0320.txt
+    4 a_level_SP0320.txt
+    5 neg_words.txt
+    6 行业-危机分类词
 
 二、词典类型: sentiment_dict
     1 情感词典: emotion_dict
-        positive_words：合并中文正面情感词语和中文正面评价词语去重后构建正面基础情感词典
-        negative_words：合并中文负面情感词语和中文负面评价词语去重后构建负面基础情感词典
-        以 How Net 为主体，采用哈工大同义词词林和台湾大学 NTUSD 简体中文版本
-            进行去重、剔除歧义词汇之后，分别加入正/负面基础情感词典
-    2 程度词典: degree_dict
+        20180920
+            positive_words：合并中文正面情感词语和中文正面评价词语去重后构建正面基础情感词典
+            negative_words：合并中文负面情感词语和中文负面评价词语去重后构建负面基础情感词典
+            以 How Net 为主体，采用哈工大同义词词林和台湾大学 NTUSD 简体中文版本
+                进行去重、剔除歧义词汇之后，分别加入正/负面基础情感词典。
+            也加入了 a_level_SP0320.txt 和 neg_words.txt 中的词。
+        20181026    
+            将之前的合并词分为负面词和非负词，用于人工校正。
+            校正完 负面词
+            加入 行业-危机分类词
+    2 程度词典: degree_dict 20180920
         以中文程度级别词语作为描述情感词的程度词语词典
         How Net 对程度词语进行了级别分类，具体分为 6 个等级: 
             最(most, 0.25) 、很(very, 0.18) 、较(more, 0.15) 、
             稍(-ish, 0.12) 、欠(insufficiently, 0.10) 和超(over, 0.20) 
-    3 否定词典: privative_dict 
+    3 否定词典: privative_dict  20180920
         词语：'不、没、无、非、莫、弗、勿、毋、未、否、别、無、休、不要、没有、未必、难以、未曾、不能'
         由于否定词在进行情感判断时具有置反作用，所以将其权值设置为－1。
-    4 转折归总词典: transitional_dict
+    4 转折归总词典: transitional_dict  20180920
         词语：'但、但是、却、然而、不过、只是、就是、总之、总而言之、总体来看、认为、觉得、总结、综上所述'
         文本中可能也会包含对作者观点进行总结的归总类词汇，
             包含这类词汇的分句更能够表达作者的情感倾向，所以需要赋予更高的权重比例
@@ -79,7 +87,6 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
     json.dump(transitional_dict,json_file,ensure_ascii=False)
 
 #%% 程度词典
-
 file_path = "sentiment_dict\HowNet_sentiment\程度级别词语（中文）.txt"
 print('********* file_path: ', file_path)
 
@@ -122,34 +129,34 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
     json.dump(degree_dict,json_file,ensure_ascii=False)
     
 #%% 情感词典
-file_list = ['正面评价词语（中文）.txt', '正面情感词语（中文）.txt', 
-             '负面评价词语（中文）.txt', '负面情感词语（中文）.txt']
-
-emotion_dict = {}
-for file_name in file_list:
-    if '正' in file_name:
-        weight = 1
-    else :
-        weight = -1
-    file_path = "sentiment_dict\HowNet_sentiment\%s"%file_name
-    print('********* file_path: ', file_path)
-    
-    print(file_name, weight)
-    encode = get_txt_encode(file_path) 
-    
-    f = open(file_path, 'r', encoding = encode)
-    for index, line in enumerate(f):
-        if index < 2:
-            continue
-        line = line.replace('\n', '').strip()        
-        if len(line) > 0:
-#            print(line, pos_weight)
-            if line in emotion_dict:
-                print('-- 已存在：', line)
-            else :
-#                emotion_dict[line] = weight
-                emotion_dict[line] = [weight, file_name]
-    f.close()
+#file_list = ['正面评价词语（中文）.txt', '正面情感词语（中文）.txt', 
+#             '负面评价词语（中文）.txt', '负面情感词语（中文）.txt']
+#
+#emotion_dict = {}
+#for file_name in file_list:
+#    if '正' in file_name:
+#        weight = 1
+#    else :
+#        weight = -1
+#    file_path = "sentiment_dict\HowNet_sentiment\%s"%file_name
+#    print('********* file_path: ', file_path)
+#    
+#    print(file_name, weight)
+#    encode = get_txt_encode(file_path) 
+#    
+#    f = open(file_path, 'r', encoding = encode)
+#    for index, line in enumerate(f):
+#        if index < 2:
+#            continue
+#        line = line.replace('\n', '').strip()        
+#        if len(line) > 0:
+##            print(line, pos_weight)
+#            if line in emotion_dict:
+#                print('-- 已存在：', line)
+#            else :
+##                emotion_dict[line] = weight
+#                emotion_dict[line] = [weight, file_name]
+#    f.close()
 
 #%% 同义词
 #file_path = "sentiment_dict\synonym.txt"
@@ -170,31 +177,36 @@ for file_name in file_list:
 #f.close()
 
 #%% a_level_SP0320.txt
-file_path = "sentiment_dict\\a_level_SP0320.txt"
-print('********* file_path: ', file_path)
-
-encode = get_txt_encode(file_path) 
-f = open(file_path, 'r', encoding = encode)
-
-#emotion_dict = {}
-
-for index, line in enumerate(f):
-    line_list = line.replace('\n', '').strip().split() 
-    try :       
-        if line_list:
-            print(line_list)
-            word  = line_list[0]
-            weight = float(line_list[1].strip())
-            if word not in emotion_dict:
-#                emotion_dict[word] = weight
-                emotion_dict[word] = [weight, file_path]
-                print('-- 不存在：', line)
-    except Exception as e:
-        print(e)
-        print(line)
-f.close()
+#file_path = "sentiment_dict\\a_level_SP0320.txt"
+#print('********* file_path: ', file_path)
+#
+#encode = get_txt_encode(file_path) 
+#f = open(file_path, 'r', encoding = encode)
+#
+##emotion_dict = {}
+#
+#for index, line in enumerate(f):
+#    line_list = line.replace('\n', '').strip().split() 
+#    try :       
+#        if line_list:
+#            print(line_list)
+#            word  = line_list[0]
+#            weight = float(line_list[1].strip())
+#            if word not in emotion_dict:
+##                emotion_dict[word] = weight
+#                emotion_dict[word] = [weight, file_path]
+#                print('-- 不存在：', line)
+#    except Exception as e:
+#        print(e)
+#        print(line)
+#f.close()
 
 #%% neg_words.txt
+
+#
+#file_path = "sentiment_dict\\neg_words.txt"
+#emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -1)
+#%%
 def update_emotion_dict(emotion_dict, file_path, weight):
     print('********* file_path: ', file_path)
     encode = get_txt_encode(file_path) 
@@ -204,49 +216,40 @@ def update_emotion_dict(emotion_dict, file_path, weight):
         line = line.replace('\n', '').strip()
         try :       
             if line not in emotion_dict:
-#                emotion_dict[line] = weight
-                emotion_dict[line] = [weight, file_path]
+                emotion_dict[line] = weight
+#                emotion_dict[line] = [weight, file_path]
                 print('-- 不存在：', line)
         except Exception as e:
             print(e)
             print(line)
     f.close()
     
-    return emotion_dict
+    return emotion_dict    
+    
+#%% 情感词典 -- 校正后
+import pandas as pd
 
-file_path = "sentiment_dict\\neg_words.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -1)
+filename_list = ['负面词_校正版_20181026.xlsx', '非负词_未校正_20181026.xlsx']
+
+emotion_dict = {}
+for filename in filename_list:
+    file_path = 'sentiment_dict\\校正后词典_20181026\\' + filename
+    tmp_data = pd.read_excel(file_path)
+    for index in tmp_data.index:
+        word = tmp_data.loc[index, 'word']
+        weight = tmp_data.loc[index, 'weight']
+        if word not in emotion_dict:
+            emotion_dict[word] = weight
+        else :
+            print('已存在： ', word)
 
 #%% circ
-file_path = "sentiment_dict\\circ_neg_self_define.txt"
+file_path = "corpus\\circ_crisis_dict.txt"
 emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -1)
 
-file_path = "sentiment_dict\\circ_pos_self_define.txt"
+#%% cbrc
+file_path = "corpus\\cbrc_warning_dict.txt"
 emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = 1)
-
-#%%
-emotion_list = []
-for key in emotion_dict:
-    emotion_list.append([key] + emotion_dict[key])
-
-import pandas as pd
-emotion_pd = pd.DataFrame(emotion_list, columns = ['word','weight', 'filename'])
-
-#%%
-
-def decide_label(w):
-    if w < 0:
-        return -1
-    elif w > 0:
-        return 1
-    elif w == 0:
-        return 0
-    else :
-        print(' -- 出错')
-emotion_pd['label'] = emotion_pd['weight'].apply(lambda w: decide_label(w))
-
-emotion_pd.head()
-emotion_pd.to_excel("corpus/sentiment_emotion_dict.xlsx", index = False)
 
 #%%
 file_path = "corpus/sentiment_emotion_dict.txt"
@@ -255,24 +258,29 @@ for key,value in emotion_dict.items():
     f.write(key + ' ' + str(value) + '\n')
 f.close()  
 
-
 with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
     json.dump(emotion_dict,json_file,ensure_ascii=False)
+
 #%%
+#emotion_list = []
+#for key in emotion_dict:
+#    emotion_list.append([key] + emotion_dict[key])
+#
+#import pandas as pd
+#emotion_pd = pd.DataFrame(emotion_list, columns = ['word','weight', 'filename'])
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#def decide_label(w):
+#    if w < 0:
+#        return -1
+#    elif w > 0:
+#        return 1
+#    elif w == 0:
+#        return 0
+#    else :
+#        print(' -- 出错')
+#emotion_pd['label'] = emotion_pd['weight'].apply(lambda w: decide_label(w))
+#
+#emotion_pd.head()
+#emotion_pd.to_excel("corpus/sentiment_emotion_dict.xlsx", index = False)
 
 

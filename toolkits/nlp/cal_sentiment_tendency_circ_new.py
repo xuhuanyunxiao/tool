@@ -10,11 +10,6 @@ import numpy as np
 # 加载自定义词典
 jieba.load_userdict('corpus/insurance_dict_20180803.txt')
 
-org_company_list = set()
-f = open('circ_sel_org_and_company.txt', 'r', encoding = 'utf-8-sig')
-for line in f.readlines():
-    org_company_list.add(line.strip())
-f.close()
 #%%
 with open("corpus/sentiment_emotion_dict.json",'r',encoding='utf-8') as json_file:
     sentiment_emotion_dict = json.load(json_file)             
@@ -143,6 +138,7 @@ def get_entity(pre_sentences, dictionarys):
     for sen_loc, [pos_list, word_list] in pre_sentences.items():            
         sentence_flag = 0
         cpns = []
+        aka_names = []
         if ('rm' not in pos_list) & ('cpn' in pos_list):   # 含 去除词 的句子需过滤掉   
             for pos, word in zip(pos_list, word_list):
                 if pos == 'cpn':  # 公司主体   
@@ -161,26 +157,22 @@ def get_entity(pre_sentences, dictionarys):
                             else :
                                 sentence_flag = 1
                             
-                            if sentence_flag:
-                                if dictionarys['data'][word_id][3] in org_company_list:                                    
-                                    cpns.append(dictionarys['data'][word_id])
-                                    if word not in org_loc:
-                                        org_loc[word] = [dictionarys['data'][word_id][3],
-                                                         {sen_loc}]
-                                    else :
-                                        org_loc[word][1].add(sen_loc) 
-#                                    print('-------------')
-#                                    print(word, word_id)
-#                                    print(cpns)
-#                                    print(org_loc)
+                            if sentence_flag:                                  
+                                cpns.append(dictionarys['data'][word_id])
+                                aka_names.append(word)
+                                if word not in org_loc:
+                                    org_loc[word] = [dictionarys['data'][word_id][3],
+                                                     {sen_loc}]
+                                else :
+                                    org_loc[word][1].add(sen_loc) 
                     except :
                         continue 
                       
         if len(cpns) > 0: # 符合一个主体词、两个辅助词、一个去除词的规则
-            for cpn in cpns:
+            for cpn, aka_name in zip(cpns, aka_names):
                 if cpn[2] not in repeat_id:                            
                     dict_ = {"id": cpn[0], "classify_id": cpn[1], "node_id": cpn[2], 
-                             "name": cpn[3]}
+                             "name": cpn[3], "aka_name": aka_name}
                     org_list.append(dict_)
                     repeat_id.add(cpn[2])
     return org_list, org_loc                    
@@ -300,8 +292,7 @@ def cal_sen_tend(sen_loc, pre_sentence):
            tendence_score = 1.2 * tendence_score
     return tendence_score, rule_index
 
-#%%
-def cal_sentences_tendency(pre_sentences, org_loc):
+def cal_sentences_tendency(pre_sentences, org_loc, sentences):
     '''
     计算实体所在句及前后各一句所在的情感倾向
     '''
@@ -310,18 +301,43 @@ def cal_sentences_tendency(pre_sentences, org_loc):
     num_range = 1 # 左右各一个数字，共三个
     org_score_dict = {}
     org_sen_loc = {}
-    for word in org_loc:
-        name = org_loc[word][0]
-        sen_loc_list = org_loc[word][1]        
+    org_sentences_pos_word_weight = {}
+    
+    for org in org_loc:
+        name = org_loc[org][0]
+        sen_loc_list = org_loc[org][1]        
         org_score_list = []
+        sentences_pos_word_weight = []
         for sen_loc in sen_loc_list:       
             # 获取 左中右共三句话，计算倾向值，并取平均值
             sentence_index_list =  get_range(sen_loc, num_range, 
                                         sen_loc_min, sen_loc_max, step = 1)
+            
             for sen_index in sentence_index_list:
                 pre_sentence = pre_sentences[sen_index]
                 tendence_score, rule_index = cal_sen_tend(sen_index, pre_sentence)
                 org_score_list.append(tendence_score)
+                pos_word_weight = []                
+                for pos,word in zip(pre_sentence[0], pre_sentence[1]):
+                    if pos in ['emotion', 'privative', 'transitional', 'degree']:
+                        if pos == 'emotion':
+                            weight = sentiment_emotion_dict[word]
+                        elif pos == 'degree':
+                            weight = sentiment_degree_dict[word] 
+                        elif pos == 'privative':
+                            weight = 0.8 
+                        elif pos == 'transitional':
+                            weight = 1.2                              
+                        pos_word_weight.append((pos, word, weight)) 
+                sentences_pos_word_weight.append([sen_loc, sen_index, 
+                                                  tendence_score, rule_index,
+                                                  sentences[sen_index], 
+                                                  pos_word_weight])
+        
+        if name not in org_sentences_pos_word_weight:
+            org_sentences_pos_word_weight[name] = sentences_pos_word_weight
+        else :
+            org_sentences_pos_word_weight[name] += sentences_pos_word_weight
         
         if name not in org_score_dict:
             org_score_dict[name] = [np.mean(org_score_list)]
@@ -334,34 +350,9 @@ def cal_sentences_tendency(pre_sentences, org_loc):
     for key in org_score_dict:
         org_score_dict[key] = np.mean(org_score_dict[key])
             
-    return org_score_dict, org_sen_loc
+    return org_score_dict, org_sen_loc, org_sentences_pos_word_weight
 
 #%%
-#for key in pre_sentences:
-#    pre_sentence = pre_sentences[key]    
-#    tendence_score = cal_sen_tend(key, pre_sentence)
-#    print('  ----------  ')
-#    print(tendence_score)
-#    print(pre_sentence)
-#
-##%%
-#pre_sentences = preprocess_sentences([title])
-#pre_sentence = pre_sentences[0]
-#tendence_score = cal_sen_tend(0, pre_sentence)
-         
-#title = titles[0]
-#content = contents[0]
-#
-#def load_sentiment_dict():    
-#    for word in sentiment_emotion_dict:
-#    	     jieba.add_word(word, 50, 'emotion')     
-#    for word in sentiment_privative_dict:
-#    	     jieba.add_word(word, 50, 'privative')    
-#    for word in sentiment_transitional_dict:
-#    	     jieba.add_word(word, 50, 'transitional')    
-#    for word in sentiment_degree_dict:
-#    	     jieba.add_word(word, 50, 'degree')
-#%%                                    
 def evaluate_article(title, content, dictionarys):
     '''
     计算一篇文章倾向、以及每个主体的倾向
@@ -376,31 +367,50 @@ def evaluate_article(title, content, dictionarys):
     title_pos_word = []
     for pos,word in zip(pre_title[0], pre_title[1]):
         if pos in ['emotion', 'privative', 'transitional', 'degree']:
-            title_pos_word.append((pos, word))
+            if pos == 'emotion':
+                weight = sentiment_emotion_dict[word]
+            elif pos == 'degree':
+                weight = sentiment_degree_dict[word]  
+            elif pos == 'privative':
+                weight = 0.8 
+            elif pos == 'transitional':
+                weight = 1.2                  
+            title_pos_word.append((pos, word, weight))
     
     # content
     content = clear_article(str(content))  # clear_article
     sentences = [i.strip() for i in cut_sentences(content)]
-    pre_sentences = preprocess_sentences(sentences)
-    org_list, org_loc = get_entity(pre_sentences, dictionarys)
-    org_score_dict, org_sen_loc = cal_sentences_tendency(pre_sentences, org_loc)
+    pre_sentences = preprocess_sentences(sentences)    
     
-    org_score_list = []
-    for cpn in org_list:
-        cpn['org_tendency_score'] = org_score_dict[cpn['name']]
-        org_score_list.append(cpn)
-        
-    # 计算篇章倾向
     content_score = 0
-    if org_score_list:
-        for org_score in org_score_list:
-            content_score += org_score['org_tendency_score']
+    org_score_list = []
+    org_sentences_pos_word_weight = []
+    if len(pre_sentences) > 0:
+        org_list, org_loc = get_entity(pre_sentences, dictionarys)                    
+        org_score_dict, org_sen_loc, \
+        org_sentences_pos_word_weight = cal_sentences_tendency(pre_sentences, 
+                                                               org_loc, sentences)    
 
-    chapter_tendency_score = title_score * 0.7 + content_score * 0.3
+        for cpn in org_list:
+            # 选出 保险机构 用于判断倾向性 （classify_id = 40
+            if cpn['classify_id'] in [6,]:
+                try :
+                    cpn['org_tendency_score'] = org_score_dict[cpn['name']]
+                except:
+                    cpn['org_tendency_score'] = org_score_dict[cpn['aka_name']]
+                    
+                content_score += cpn['org_tendency_score']
+                
+            else :
+                cpn['org_tendency_score'] = 0 # 未选择的机构都为非负        
+            org_score_list.append(cpn)     
+
+    chapter_tendency_score = title_score * 0.6 + content_score * 0.4
 
     del_mysql_dict(dictionarys)
 
-    return chapter_tendency_score, org_score_list, title_score, content_score, title_rule_index, title_pos_word
+    return chapter_tendency_score, org_score_list
+#    return chapter_tendency_score, org_score_list, title_score, content_score, title_rule_index, title_pos_word, org_sentences_pos_word_weight
 
 def process_articles(titles, contents, dictionarys):
     org_res = []
@@ -418,19 +428,21 @@ if __name__ == '__main__':
     
     dictionarys = dictionarys_2
     
-#    titles = ['监管部门拟调研P2P平台保证保险业务',]
-#    contents = ['''保监会北京监管局将要重拳打击证券行业的的乱象。
-#                他们会进一步考虑引入其他机制。
-#                那样，北京保监局就难以在短期内有所动作。
-#                不知道这是不是一个好消息？
-#                证券市场也许就会有更规范的秩序，保证交易合理有序进行。
-#                这样的现象也正在影响其他城市，未曾开始的领域还有很多！
-#                当然，现在仍有许多专业人士就这些吵的不可开交。
-#                但是，至于有多少用处就不知道了，国寿公司也在配合监管部门。
-#                总之， 保险监督管理委员会上海监管局也在强化监管层面的政策。''',]  
+    titles = ['监管部门拟调研P2P平台保证人保资管的保险业务避免陷入混乱',]
+    contents = ['''保监会北京监管局将要重拳打击证券行业的的乱象。
+                他们会进一步考虑引入其他机制。
+                那样，北京保监局就难以在短期内有所动作。
+                不知道这对汇丰人寿是不是一个好消息？
+                证券市场也许就会有更规范的秩序，保证交易合理有序进行。
+                这样的现象也正在影响其他城市，未曾开始的领域还有很多！
+                当然，现在仍有许多专业人士就这些吵的不可开交。
+                但是，至于有多少用处就不知道了，国寿公司也在配合监管部门。
+                总之， 保险监督管理委员会上海监管局也在强化监管层面的政策。''',]  
+#    process_articles(titles, contents, dictionarys)
+    
 #    
-#    title = titles[0]
-#    content = contents[0]
+    title = titles[0]
+    content = contents[0]
 #    
 #    with open("corpus/dictionary_jsyh.json",'r',encoding='utf-8') as json_file:
 #        dictionary_jsyh=json.load(json_file) 
@@ -445,36 +457,36 @@ if __name__ == '__main__':
 
 
 #%%
-import pandas as pd
-
-data = pd.read_excel('circ_class_predict_mysql_2018-10-07.xlsx')
-data = data.iloc[:300, :]
-titles = data['title'].tolist()
-contents = data['content'].tolist()
-#chapter_res, org_res = process_articles(titles, contents, dictionarys)
-
-#%%
-org_res = []
-chapter_res = []
-index = -1
-for title, content in zip(titles, contents):
-    try :
-        index += 1
-        
-        id = data.loc[index, 'id']
-        predict_label = data.loc[index, 'predict_label']
-        chapter_tendency_score, org_score_list, title_score, content_score, title_rule_index, title_pos_word = evaluate_article(title, content, dictionarys)
-        chapter_res.append([id, predict_label, title,content, chapter_tendency_score, title_score, content_score, title_rule_index, str(title_pos_word), str(org_score_list)])
-        org_res.append(org_score_list)
-        
-    except Exception as e:
-        print(index)
-        print(e)
-        continue
-    
-ss = 'id,predict_label,title,content,chapter_tendency_score,title_score,content_score,title_rule_index,title_pos_word,org_score_list'
-chapter_res = pd.DataFrame(chapter_res, columns = ss.split(','))
-chapter_res.to_excel('circ_chapter_tendency_score_300.xlsx', index = False)
+#import pandas as pd
+#
+#data = pd.read_excel('circ_class_predict_mysql_2018-10-07.xlsx')
+#data = data.iloc[:300, :]
+#titles = data['title'].tolist()
+#contents = data['content'].tolist()
+##chapter_res, org_res = process_articles(titles, contents, dictionarys)
+#
+##%%
+#org_res = []
+#chapter_res = []
+#index = -1
+#for title, content in zip(titles, contents):
+#    try :
+#        index += 1
+#        
+#        id = data.loc[index, 'id']
+#        predict_label = data.loc[index, 'predict_label']
+#        chapter_tendency_score, org_score_list, title_score, content_score, title_rule_index, title_pos_word = evaluate_article(title, content, dictionarys)
+#        chapter_res.append([id, predict_label, title,content, chapter_tendency_score, title_score, content_score, title_rule_index, str(title_pos_word), str(org_score_list)])
+#        org_res.append(org_score_list)
+#        
+#    except Exception as e:
+#        print(index)
+#        print(e)
+#        continue
+#    
+#ss = 'id,predict_label,title,content,chapter_tendency_score,title_score,content_score,title_rule_index,title_pos_word,org_score_list'
+#chapter_res = pd.DataFrame(chapter_res, columns = ss.split(','))
+#chapter_res.to_excel('circ_chapter_tendency_score_300.xlsx', index = False)
 
 #%%
 

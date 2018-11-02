@@ -229,4 +229,3 @@ else:
     bytes = str
     basestring = basestring
 
-
