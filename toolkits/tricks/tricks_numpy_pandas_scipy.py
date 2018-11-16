@@ -59,16 +59,18 @@ useful_data = useful_data.reindex(columns=pd.MultiIndex.from_tuples(tupless))
 kfold_result.insert(0, '备注', '') # 第0列，列名，该列的值
 
 # 将某列设为index
-address_matrix = pd.DataFrame(address_matrix, columns = ['index','城市级别','城市名']).drop_duplicates(subset=['index']).set_index('index')
+address_matrix = pd.DataFrame(address_matrix, 
+  columns = ['index','城市级别','城市名']).drop_duplicates(subset=['index']).set_index('index')
 
 # 准确内存大小  -----------------
 company_regis_capital.info(memory_usage = 'deep') 
 table_data_commom['exist_days'].value_counts(dropna = False)
 
-# 读取数据、保存数据  -----------------
+# 读写数据、保存数据  -----------------
 # 分块读取
 reader = pd.read_table('tmp.sv', sep='|', chunksize=4)
 for chunk in reader: print(chunk)
+
 # 迭代读取
 chunks = pd.read_csv('train.csv',iterator = True)
 chunk = chunks.get_chunk(5)
@@ -112,6 +114,9 @@ writer = pd.ExcelWriter('Q3_data/circ_Q3_tendency_result_20181018_7.xlsx',
 
 useful_data.to_excel(writer, sheet_name='Sheet1', index = False)
 writer.save()
+
+id_list = tuple(day_id_1['id'].tolist())
+
 
 #%% -----------------     numpy  ----------------------
 import numpy as np

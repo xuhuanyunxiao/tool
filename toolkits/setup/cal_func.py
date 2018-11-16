@@ -17,7 +17,7 @@
     
 使用：
     import toolkits  # toolkits.specific_func.contain_ch('salskdj中文')
-    from toolkits.specific_func import set_ch_pd
+    from toolkits.setup.specific_func import set_ch_pd
     
 文档测试：
 def multiply(a, b):

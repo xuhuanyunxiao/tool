@@ -1,0 +1,25 @@
+hadoop £º
+# cd /root/software/hadoop/hadoop-2.7.6
+# bin/hdfs namenode -format
+
+# sbin/stop-all.sh  Í£Ö¹Hadoop 
+# bin/hadoop namenode -format   ÖØÐÂ¸ñÊ½»¯namenode½Úµã
+# sbin/start-all.sh   Æô¶¯Hadoop
+jps²é¿´javaµÄºóÌ¨½ø³Ì
+# jps
+http://localhost:8088
+hadoop½ø³Ì¹ÜÀíÒ³Ãæ£¬Web²é¿´NameNodeÔËÐÐ×´¿ö
+http://localhost:50070
+hdfs¹ÜÀíÒ³Ãæ£¬Web²é¿´hdfs¹ÜÀíÒ³Ãæ
+
+¼òµ¥hdfsÃüÁî²âÊÔ
+hdfs dfs -ls /
+hdfs dfs -mkdir /test
+hdfs dfs -put file01.txt /test/file01.txt
+hdfs dfs -cat /test/file01.txt
+hdfs dfsadmin -safemode leave  ÍË³ö°²È«Ä£Ê½
+hdfs dfsadmin -safemode get
+
+Æô¶¯hadoop namenode datanode
+sbin/hadoop-daemon.sh start namenode
+sbin/hadoop-daemon.sh start datanode

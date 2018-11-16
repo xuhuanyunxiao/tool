@@ -18,6 +18,46 @@ from jieba import analyse
 tfidf = analyse.extract_tags
 keywords = tfidf(text)
 
+
+#%% -----------------     wordcloud  ----------------------
+
+from wordcloud import WordCloud,STOPWORDS
+import random
+
+def random_color(word, font_size, position, orientation, random_state=None, **kwargs):
+    return "#%06x" % random.randint(0, 0xFFFFFF)
+
+# samsung_mask=np.array(Image.open('Samsung-Galaxy-Note-7.jpg'))
+wordcloud_model = WordCloud(font_path = r'C:\Windows\Fonts\STKAITI.TTF', 
+                      background_color='white',mode='RGB', # 背景颜色                      
+                      # mask=back_coloring,  # 设置背景图片  mask=samsung_mask
+                      max_words=1000,  # 词云显示的最大词数
+                      random_state=42, max_font_size=60,  # 字体最大值
+                      # 设置图片默认的大小,但是如果使用背景图片的话,那么保存的图片大小将会按照其大小保存
+                      width=1000, height=860, 
+                      margin=2,# margin为词语边缘距离
+                     )
+
+# wordcloud_res = wordcloud_model.generate(wordcloud_data)
+# wordcloud_model.generate_from_frequencies(txt_freq)
+# txt_freq例子为[('词a', 100),('词b', 90),('词c', 80)]
+
+# image_colors = ImageColorGenerator(back_coloring)
+# plt.imshow(wc.recolor(color_func=image_colors))
+# plt.imshow(wordcloud.recolor(color_func=random_color))
+
+for index, class_name in enumerate(list(np.unique(label))):
+    wordcloud_data = " ".join([i for i,j in zip(title_content, label) if j == class_name])
+    wordcloud_res = wordcloud_model.generate(wordcloud_data)
+    plt.figure(figsize = (15,16))
+    plt.title('%s Title = %s'%(index, class_name), fontsize = 30)
+#     plt.imshow(wordcloud_res)
+    plt.imshow(wordcloud_res.recolor(color_func=random_color))
+    plt.axis("off")
+    plt.show()
+#     wordcloud.to_file('test.png')
+
+
 #%% -----------------     scikit learn  ----------------------
 #%% 加载数据集  ----------------------
 from sklearn.datasets import load_iris
@@ -115,11 +155,13 @@ class FeatureUnionExt(FeatureUnion):
     #相比FeatureUnion，多了idx_list参数，其表示每个并行工作需要读取的特征矩阵的列
     def __init__(self, transformer_list, idx_list, n_jobs=1, transformer_weights=None):
         self.idx_list = idx_list
-        FeatureUnion.__init__(self, transformer_list=map(lambda trans:(trans[0], trans[1]), transformer_list), n_jobs=n_jobs, transformer_weights=transformer_weights)
+        FeatureUnion.__init__(self, transformer_list=map(lambda trans:(trans[0], trans[1]), transformer_list), 
+            n_jobs=n_jobs, transformer_weights=transformer_weights)
  
     #由于只部分读取特征矩阵，方法fit需要重构
     def fit(self, X, y=None):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), self.transformer_list, self.idx_list)
+        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
+            self.transformer_list, self.idx_list)
         transformers = Parallel(n_jobs=self.n_jobs)(
             #从特征矩阵中提取部分输入fit方法
             delayed(_fit_one_transformer)(trans, X[:,idx], y)
@@ -129,7 +171,8 @@ class FeatureUnionExt(FeatureUnion):
  
     #由于只部分读取特征矩阵，方法fit_transform需要重构
     def fit_transform(self, X, y=None, **fit_params):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), self.transformer_list, self.idx_list)
+        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
+            self.transformer_list, self.idx_list)
         result = Parallel(n_jobs=self.n_jobs)(
             #从特征矩阵中提取部分输入fit_transform方法
             delayed(_fit_transform_one)(trans, name, X[:,idx], y,
@@ -146,7 +189,8 @@ class FeatureUnionExt(FeatureUnion):
  
     #由于只部分读取特征矩阵，方法transform需要重构
     def transform(self, X):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), self.transformer_list, self.idx_list)
+        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
+            self.transformer_list, self.idx_list)
         Xs = Parallel(n_jobs=self.n_jobs)(
             #从特征矩阵中提取部分输入transform方法
             delayed(_transform_one)(trans, name, X[:,idx], self.transformer_weights)
@@ -160,6 +204,7 @@ class FeatureUnionExt(FeatureUnion):
 # pipeline ----------------------
 import psutil
 print ('获取内存占用率： '+(str)(psutil.virtual_memory().percent)+'%')
+
 # Pipeline、FeatureUnion
 # CountVectorizer、TfidfTransformer
 # cv_results_、best_score_、best_params_ 、、、、

@@ -5,6 +5,11 @@ Created on Thu Oct 19 10:49:30 2017
 @author: xh
 """
 
+if ('specific_func' not in dir()) | ('cal_func' not in dir()):
+    from toolkits.setup import specific_func  
+    from toolkits.setup import cal_func
+# from toolkits.setup.specific_func import set_ch_pd
+
 # 修改 logging 文件
 File "D:\software\conda\lib\logging\handlers.py", line 113, in rotate
     os.rename(source, dest)

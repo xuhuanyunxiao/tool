@@ -31,6 +31,53 @@ output_HTML(current_file, output_file)
 import warnings
 warnings.filterwarnings('ignore')
 
+# 自动重新加载更改的模块
+%load_ext autoreload
+%autoreload 2
+
+%matplotlib inline
+
+
+#%% -----------------     jieba  ----------------------
+
+# 分句  ----------------------
+def cut_sentences(sentence):
+    '''
+    中文，依据标点符号分句：。！？
+    '''
+    puns = frozenset(u'。！？')
+    tmp = []
+    for ch in sentence:
+        tmp.append(ch)
+        if puns.__contains__(ch):
+            yield ''.join(tmp)
+            tmp = []
+    yield ''.join(tmp)
+
+def cut_sentences(para):
+    para = re.sub('([。！？\?])([^”])',r"\1\n\2",para) # 单字符断句符
+    para = re.sub('(\.{6})([^”])',r"\1\n\2",para) # 英文省略号
+    para = re.sub('(\…{2})([^”])',r"\1\n\2",para) # 中文省略号
+    para = re.sub('(”)','”\n',para)   # 把分句符\n放到双引号后，注意前面的几句都小心保留了双引号
+    para = para.rstrip()       # 段尾如果有多余的\n就去掉它
+    #很多规则中会考虑分号;，但是这里我把它忽略不计，破折号、英文双引号等同样忽略，需要的再做些简单调整即可。
+    return para.split("\n")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #%% -----------------     NLTK  ----------------------
 # ——nltk.corpus    获取语料库。
 # ——————语料库和词典的标准化接口

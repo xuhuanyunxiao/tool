@@ -1,0 +1,70 @@
+
+#%% -----------------     git  ----------------------
+
+git branch   查看分支（* 当前分支）
+git branch -v  查看各个分支最后一个提交对象的信息
+git branch --merged  已经与当前分支合并的分支
+git branch --no-merged  尚未与当前分支合并的分支
+git branch testing  新建分支testing（以当前所在分支，分支新建）
+git checkout testing  切换到分支testing
+git checkout -b iss53  新建分支并切换到该分支
+git merge hotfix  将分支hotfix合并到当前分支
+git branch -d iss53  删除分支
+git mergetool  调用一个可视化的合并工具并引导你解决所有冲突
+
+git fetch origin   来同步远程服务器上的数据到本地 
+git remote add 命令把它加为当前项目的远程分支之一
+git push origin serverfix
+git push origin serverfix:serferfix   上传我本地的 serverfix 分支到远程仓库中去，仍旧称它为 serverfix 分支
+git push origin serverfix:awesomebranch 
+git checkout -b serverfix origin/serverfix   切换到新建的 serverfix 本地分支，其内容同远程分支 origin/serverfix 一致
+git checkout -b sf origin/serverfix   本地分支 sf 会自动向 origin/serverfix 推送和抓取数据
+git push origin :serverfix   在服务器上删除serverfix 分支
+
+
+使用git可以列出所有已经跟踪的文件，当前目录下有两个文件：
+$ ll
+下面通过命令只列出已经被跟踪的文件：
+$ git ls-tree -r master --name-only
+如果想要显示的信息详细一点，可以去掉后面的参数：
+$ git ls-tree -r master
+
+
+git 方式更新代码：
+文件夹：git_prog/proj_circ
+代码更新：
+git reset --hard HEAD    
+git clean -f -d    
+git pull
+
+
+#%% -----------------     conda  ----------------------
+
+conda update --help  ： 查看帮助，学习conda的update命令
+conda --version  ： 安装Anaconda软件的版本
+conda update conda  ： 升级当前版本的conda
+proceed ([y]/n)? y  ：  新版本的conda可用，会提示你输入y进行升级
+conda list   ： conda 中含有的 package
+conda list  matplotlib ： conda 中含有的 package的版本号
+conda install name  ： name是需要安装packages的名字
+
+conda env list  ：  列出所有的环境
+conda info --envs  ：   确认当前环境（带 * 号）
+conda create --name snowflake biopython  ： 将会给Biopython创建一个新的环境
+activate snowflake  ：  激活这个新环境
+conda create --name py35 python=3  ：py35是环境名字，python=3是需要的版本
+activate py35  ： 激活环境
+
+activate snowflakes  ： 为了切换到另一个环境，键入下列命令以及所需环境的名字
+conda create --name flowers --clone snowflakes  ：  通过克隆snowfllakes来创建一个称为flowers的副本
+conda info --envs  ： 来检查环境
+conda remove --name flowers --all  ： 移除该环境
+conda info --envs  ：  确定这个名为flowers的环境已经被移除
+
+
+
+
+
+
+
+

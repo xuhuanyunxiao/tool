@@ -211,7 +211,7 @@ cursor.close()
 # 其实原理是使用了pg内置的copy_from方法，SUPER FAST！
 
 
-
+id_list = tuple(day_id_1['id'].tolist())
 
 #  ----------------- 
 # 保监会

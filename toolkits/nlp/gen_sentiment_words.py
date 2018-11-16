@@ -52,13 +52,14 @@
 #%%
 import json
 from toolkits.setup.specific_func import get_txt_encode
-
+import pandas as pd
 
 #%% 否定词典
-privative_str = '不、没、无、非、莫、弗、勿、毋、未、否、别、無、休、不要、没有、未必、难以、未曾、不能'
+privative_str = '不、没、无、非、莫、弗、勿、毋、未、否、别、無、休、不要、不得、没有、\
+                 未必、难以、未曾、不能、但、但是、却、然而、而、不过、只是、就是、并非'
 privative_wight = -1
 
-privative_dict_list = privative_str.split('、')
+privative_dict_list = [s.strip() for s in privative_str.split('、')]
 
 file_path = "corpus/sentiment_privative_dict.txt"
 f = open(file_path, "w+", encoding='UTF-8')
@@ -71,10 +72,10 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
     json.dump(privative_dict,json_file,ensure_ascii=False)
 
 #%% 转折归总词典
-transitional_str = '但、但是、却、然而、不过、只是、就是、总之、总而言之、总体来看、认为、觉得、总结、综上所述'
+transitional_str = '总之、总而言之、总体来看、认为、觉得、总结、综上所述、最后、当然'
 transitional_wight = 3
 
-transitional_dict_list = transitional_str.split('、')
+transitional_dict_list = [s.strip() for s in transitional_str.split('、')]
 
 file_path = "corpus/sentiment_transitional_dict.txt"
 f = open(file_path, "w+", encoding='UTF-8')
@@ -92,8 +93,10 @@ print('********* file_path: ', file_path)
 
 encode = get_txt_encode(file_path)
 
-weight_dict = {'most':0.25,'very':0.18,'more':0.15,
-               '-ish':0.12,'insufficiently':0.10,'over':0.20}
+#weight_dict = {'most':0.25,'very':0.18,'more':0.15,
+#               '-ish':0.12,'insufficiently':0.10,'over':0.20}
+weight_dict = {'most':2.00,'very':1.50,'more':1.25,
+               '-ish':1.10,'insufficiently':0.75,'over':1.75}
 
 degree_dict = {}
 degree_dict_list = []
@@ -214,9 +217,9 @@ def update_emotion_dict(emotion_dict, file_path, weight):
     
     for index, line in enumerate(f):
         line = line.replace('\n', '').strip()
-        try :       
-            if line not in emotion_dict:
-                emotion_dict[line] = weight
+        try :   
+            emotion_dict[line] = weight
+            if line not in emotion_dict:                
 #                emotion_dict[line] = [weight, file_path]
                 print('-- 不存在：', line)
         except Exception as e:
@@ -227,9 +230,8 @@ def update_emotion_dict(emotion_dict, file_path, weight):
     return emotion_dict    
     
 #%% 情感词典 -- 校正后
-import pandas as pd
-
-filename_list = ['负面词_校正版_20181026.xlsx', '非负词_未校正_20181026.xlsx']
+filename_list = ['正面词_校正版_20181106.xlsx', 
+                 '负面词_校正版_20181026.xlsx', ]
 
 emotion_dict = {}
 for filename in filename_list:
@@ -239,17 +241,47 @@ for filename in filename_list:
         word = tmp_data.loc[index, 'word']
         weight = tmp_data.loc[index, 'weight']
         if word not in emotion_dict:
-            emotion_dict[word] = weight
+            if weight < 0:
+                emotion_dict[word] = -1 # weight
+            else :
+                emotion_dict[word] = 1
         else :
             print('已存在： ', word)
 
-#%% circ
-file_path = "corpus\\circ_crisis_dict.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -1)
+#%% BosonNLP_sentiment_score
+#file_path = "sentiment_dict\BosonNLP_sentiment_score\BosonNLP_sentiment_score.txt"
+#print('********* file_path: ', file_path)
+#
+#encode = get_txt_encode(file_path) 
+#f = open(file_path, 'r', encoding = encode)
+#
+#emotion_dict = {}
+#for index, lines in enumerate(f):
+#    line = lines.replace('\n', '').strip().split()        
+#    if len(line) > 0:
+#        if line[0] in emotion_dict:
+#            print('-- 已存在：', line)
+#        else :
+#            if float(line[1]) < 0:
+#                emotion_dict[line[0]] = -1 # float(line[1])
+#            else :
+#                emotion_dict[line[0]] = 1
+#f.close()
 
-#%% cbrc
+#%% 
+# circ
+file_path = "corpus\\circ_crisis_dict.txt"
+emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
+
+file_path = "sentiment_dict\\校正后词典_20181026\\circ_neg_self_define.txt"
+emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
+
+file_path = "sentiment_dict\\校正后词典_20181026\\circ_pos_self_define.txt"
+emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = 2)
+
+# cbrc
 file_path = "corpus\\cbrc_warning_dict.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = 1)
+emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
 
 #%%
 file_path = "corpus/sentiment_emotion_dict.txt"

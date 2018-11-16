@@ -1,0 +1,5 @@
+cd /root/software/Hbase/hbase-1.4.0
+bin/start-hbase.sh
+
+bin/stop-hbase.sh
+bin/hbase shell

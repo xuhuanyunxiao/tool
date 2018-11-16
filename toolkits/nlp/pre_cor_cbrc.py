@@ -51,10 +51,38 @@ def handle_content(content):
     return line
 
 
+
 def clear_sen(sent):
+    '''
+    清理句子：
+    <font color="#FF0000">  </font>
+    <article class="art_box"><h1 class="art_tit_h1">
+    </h1><time class="art_time">2018.05.09 12:52:37<cite class="art_cite">
+    </cite></time><p class="art_p">
+    
+    (微信号：wfnews001)
+    本文来源：网易湖北                      责任编辑：余蓉_WH07
+    电话号码： 95105768   13182876171
+    (刘敬元)         关注同花顺财经（ths518），获取更多机会责任编辑：zyk
+    (图)  (图片)
+    '''
+    # \u200b
     sent = sent.replace("\n", "")
     sent = sent.replace('\r','')
+    sent = sent.replace('\t','')
     sent = sent.replace('\r\n','')
+    sent = sent.replace('\u200b','')
+    sent = sent.replace('\xa0','')
+    sent = sent.replace("，", ",")
+    # sent = sent.replace("。", ".")
+    sent = sent.replace("!", "！")
+    sent = sent.replace("?", "？")
+    sent = sent.replace("(", "（")
+    sent = sent.replace(")", "）")
+
+    reobj = re.compile(r"[^\u4e00-\u9f5a。！？“”，：、（）；<>]*")
+    sent = reobj.sub("", sent)
+
     reobj = re.compile('//@(.*?)[:\s]')
     sent = reobj.sub("", sent)
     reobj = re.compile("@(.*?)[:\s]")
@@ -62,15 +90,41 @@ def clear_sen(sent):
     reobj = re.compile(r"\[[^\[\]]*?\]")
     sent = reobj.sub("", sent)
 
-    sent = sent.replace("，", ",")
-    sent = sent.replace("。", ".")
-    sent = sent.replace("！", "!")
-    sent = sent.replace("？", "?")
-    reobj = re.compile("//(.*?)[:\s]")
+    # # URL 
+    # reobj = re.compile(r'(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?')
+    # sent = reobj.sub("", sent)
+    # # E-mail
+    # reobj = re.compile(r'\w+@([0-9a-zA-Z]+[-0-9a-zA-Z]*)(\.[0-9a-zA-Z]+[-0-9a-zA-Z]*)+')
+    # sent = reobj.sub("", sent)
+    # # IP
+    # reobj = re.compile(r'\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)')
+    # sent = reobj.sub("", sent)
+    # # 
+    # reobj = re.compile(r'<a .*?>(.*?)</a>') 
+    # sent = reobj.sub("", sent)    
+    # <font color="#FF0000">  </font>
+    # reobj = re.compile(r'(?<=<)[/a-zA-Z0-9 ]+=?[“"#a-zA-Z0-9_]*(?=>)')
+    # (?# reobj = re.compile(r'(?<=<)[[/a-zA-Z0-9 ]+=?"?[“”#a-zA-Z0-9_]*"?]*(?=>)'))
+    # sent = reobj.sub("", sent)
+    # （文 徐维建 编辑 孙娟） （专栏作家 聂方义）（记者刘美群）（通讯员 郑浩）
+    reobj = re.compile(r'(?<=（)[文|专栏作家|记者|通讯员| |微信号]*[\u4e00-\u9fa5 a-z]{0,}(?=）)')
     sent = reobj.sub("", sent)
-    # sent = re.sub(r'[a-z]*', '', sent)
-    return sent
+    reobj = re.compile(r'[责任编辑|更多关于]+[ ：:\u4e00-\u9fa5]*')
+    sent = reobj.sub("", sent)
+    # (图)  (图片) (刘敬元)
+    reobj = re.compile(r'[(?<=（)|(?<=\()][\u4e00-\u9fa5]{0,3}[(?=）)|(?=))]')
+    sent = reobj.sub("", sent)
+    # # 身份证号
+    # reobj = re.compile(r'([1-9]\d{5}[12]\d{3}(0[1-9]|1[012])(0[1-9]|[12][0-9]|3[01])\d{3}[0-9xX])')
+    # sent = reobj.sub("", sent)
+    # # 手机号码
+    # reobj = re.compile(r'(86)?(1[34578]\d{9})')
+    # sent = reobj.sub("", sent)
+    # # 固定电话
+    # reobj = re.compile(r'\(?(0\d{2,3})?[) -]?\d{7,8}')
+    # sent = reobj.sub("", sent)
 
+    return sent
 
 def etl(s):  
     # 去除标点和特殊字符
@@ -78,6 +132,6 @@ def etl(s):
     s = regex.sub('', s)
 
     # 去除字符中的数字
-    remove_digits = str.maketrans('', '', digits)
-    res = s.translate(remove_digits)
-    return res
+    # remove_digits = str.maketrans('', '', digits)
+    # s = s.translate(remove_digits)
+    return s
