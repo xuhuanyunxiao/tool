@@ -150,6 +150,9 @@ alter table 表名 add 列名 类型  # 添加列
 INSERT INTO 表名 VALUES(值1，值2，....)
 # 为表的指定字段添加数据
 INSERT INTO 表名（字段1，字段2，...）VALUES (值1，值2，...);
+insert into cbrc_circ.db_classify_traffic (id, name, flag) values (9, '交通', 0);
+insert into cbrc_circ.db_classify_traffic (id, name, flag) values (10, '环保', 0);
+
 
 ## #####  删除与清空
 drop talbe demand_ques; # 删除表

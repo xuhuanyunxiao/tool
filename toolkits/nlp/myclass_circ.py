@@ -253,3 +253,52 @@ class StatsFeatures_warn(BaseEstimator, TransformerMixin):
             data.append([len(x),self.getcnt(x),self.getcnt(x)/length,
                          self.getnegcnt(x),self.getnegcnt(x)/length])            
         return data
+    
+#%%
+class StatsFeatures_tf(BaseEstimator, TransformerMixin):
+    '''
+    计算中国人保中交通与环保相关词的词频
+    '''
+    def __init__(self):
+        self.corpus_path = os.path.dirname(os.path.abspath(__file__))        
+        self.keywords = set()
+        f = open(os.path.normpath(self.corpus_path + "/corpus/environment.txt"),
+                 "r+", encoding='UTF-8')
+        for content in f:
+            for w in content.strip().replace('\n', '').replace('\ufeff', '').split():
+                self.keywords.add(w)
+        f.close() 
+        
+        f = open(os.path.normpath(self.corpus_path + "/corpus/traffic.txt"),
+                 "r+", encoding='UTF-8')
+        for content in f:
+            for w in content.strip().replace('\n', '').replace('\ufeff', '').split():
+                self.keywords.add(w)
+        f.close()         
+    
+    def fit(self, X, y=None):
+        return self 
+    
+    def transform(self, X):
+        '''
+        文本中关键词的词频
+        '''                        
+        col_n = len(X)
+        data = {keyword:np.zeros((1, col_n)).tolist()[0] for keyword in self.keywords}
+        data['关键词的个数'] = np.zeros((1, col_n)).tolist()[0]
+        for index, x in enumerate(X):
+            words = x.split()
+            words_set = set(words)  
+            keycnt = 0
+            for word in words_set:
+                if word in self.keywords:
+                    keycnt+=1
+                    data[word][index] = words.count(word)
+                data['关键词的个数'][index] = keycnt
+        count_data = np.transpose(np.array([t for t in data.values()]))
+        return count_data    
+    
+#%%    
+#a = StatsFeatures_tf()
+
+
