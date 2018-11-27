@@ -37,6 +37,15 @@ git reset --hard HEAD
 git clean -f -d    
 git pull
 
+自建包库 放在git上安装
+开发方式安装
+python setup.py develop
+如果应用在开发过程中会频繁变更，每次安装还需要先将原来的版本卸掉，很麻烦。
+使用”develop”开发方式安装的话，应用代码不会真的被拷贝到本地Python环境的”site-packages”目录下，
+而是在”site-packages”目录里创建一个指向当前应用位置的链接。
+这样如果当前位置的源码被改动，就会马上反映到”site-packages”里。
+
+
 
 #%% -----------------     conda  ----------------------
 

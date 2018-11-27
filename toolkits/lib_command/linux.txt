@@ -1,53 +1,36 @@
-﻿
 
-
-挂载共享文件夹
+#%% -----------------  挂载共享文件夹
 sudo mount -t vboxsf win_to_centos7 /mnt/centos7_to_win
 sudo mount -t vboxsf win_to_centos7 /root/centos7_to_win
 sudo mount -t vboxsf win_to_centos7 /mnt/centos7_to_win
 sudo mount -t vboxsf win_to_centos7 /mnt/ubuntu_to_win
 
-
-netstat -ntlp  所有端口
-lsof -i tcp:22  端口22
-
+#%% -----------------  网卡
 systemctl restart network   重启网卡
 systemctl status network  查看网卡状态
 
-防火墙
+#%% -----------------  防火墙
 启动： systemctl start firewalld
 查看状态： systemctl status firewalld 
 停止： systemctl disable firewalld
 禁用： systemctl stop firewalld
 
-日志文件:	/data/python_apps/circ/logs/gunicorn.log
-Linux下查看硬盘及分区信息：fdisk -l 
-文件系统的磁盘空间占用情况：df -h
-查看某目录的大小: linuxidc@ubuntu:~$ du -sh 
-查看某目录下占用空间最多的文件或目录。取前10个。需要先进入该目录下。
-linuxidc@ubuntu:~$ du -cks * | sort -rn | head -n 10
+
+#%% -----------------  路径与文件 
+cp -r git_prog/proj_circ circ  # -r 递归复制，保留原文件目录结构  # 注意复制时命令所在文件夹
 rm -rf 目录名字 
 -r 向下递归，不管有多少级目录，
 -f 直接强行删除，不作提示意思。
 
-先查看端口进程
-测试服务，查看进程:	ps -ef | grep 11000
-正式服务，查看进程:	ps -ef | grep 10000
-kill -9 2234    强制（-9）杀死进程2234
 
-
-先将原有代码备份，cp -r circ circ_20180601  
-cp -r git_prog/proj_circ circ  # -r 递归复制，保留原文件目录结构  # 注意复制时命令所在文件夹
-
-再覆盖原有文件。
-
-
+#%% -----------------  系统信息
 uname：显示操作系统信息
 uname -a 显示全部信息
-
 lsb_release：显示发行版信息
 lsb_release -a 显示全部
 
+
+#%% -----------------  CUP
 /proc/cupinfo：查看CUP特性信息
 cat /proc/cpuinfo
 cat /proc/cpuinfo | grep process | wc -l   统计CPU的物理核心数量
@@ -66,8 +49,7 @@ cat /proc/cpuinfo| grep "processor"| wc -l
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
 
 
-
-查看GPU信息
+#%% -----------------  GPU
 lspci | grep -i vga
 使用nvidia GPU可以：
 lspci | grep -i nvidia
@@ -78,13 +60,64 @@ lspci -v -s 00:0f.0
 Nvidia自带一个命令行工具可以查看显存的使用情况：
 nvidia-smi
 
+查看服务器cuda版本
+cat /usr/local/cuda/version.txt
 
+#%% -----------------  硬盘与内存
 free total -h
 
+Linux下查看硬盘及分区信息
+fdisk -l 
+文件系统的磁盘空间占用情况
+df -h
+查看某目录的大小:
+linuxidc@ubuntu:~$ du -sh 
+查看某目录下占用空间最多的文件或目录。取前10个。需要先进入该目录下。
+du -cks * | sort -rn | head -n 10
 
 
+#%% -----------------  进程与端口
+iostat：查看系统CUP、磁盘性能指标
+-C 显示CPU使用情况
+-d 显示磁盘使用情况 -k以KB为单位 -m以MB为单位 -g以GB为单位
+-N 显示LVM信息
+-x 显示详细信息
+-p 显示分区情况
+另外命令后面可以加2个数字，就是时间和次数比如：
+iostat -d -m 2 5     以MB为单位显示磁盘使用情况，每2秒刷新一次，显示5次。
+
+ps -ef 
+ps -aux|grep chat.js
+a:显示所有程序 
+u:以用户为主的格式来显示 
+x:显示所有程序，不以终端机来区分
+用ps -def | grep查找进程很方便，最后一行总是会grep自己
+用grep -v参数可以将grep命令排除掉
+ps -aux|grep chat.js| grep -v grep
 
 
+查看使用某端口的进程
+查看进程:	ps -ef | grep 11000
+lsof -i:8090
+netstat -ap|grep 8090
+
+netstat -ntlp  所有端口
+lsof -i tcp:22  端口22
+
+查看到进程id之后，使用netstat命令查看其占用的端口
+netstat -nap|grep 5137
+
+
+kill -9 2234    强制（-9）杀死进程2234
+
+
+#%% -----------------  nohup和&后台运行，进程查看及终止
+nohup
+用途：不挂断地运行命令
+&
+用途：在后台运行
+一般两个一起用
+nohup command &
 
 
 

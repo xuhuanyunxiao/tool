@@ -54,12 +54,18 @@ import json
 from toolkits.setup.specific_func import get_txt_encode
 import pandas as pd
 
+all_word = {}
+del_word_list = []
+
 #%% 否定词典
 privative_str = '不、没、无、非、莫、弗、勿、毋、未、否、别、無、休、不要、不得、没有、\
                  未必、难以、未曾、不能、但、但是、却、然而、而、不过、只是、就是、并非'
 privative_wight = -1
 
 privative_dict_list = [s.strip() for s in privative_str.split('、')]
+
+all_word['否定词'] = privative_dict_list
+del_word_list += privative_dict_list
 
 file_path = "corpus/sentiment_privative_dict.txt"
 f = open(file_path, "w+", encoding='UTF-8')
@@ -77,6 +83,9 @@ transitional_wight = 3
 
 transitional_dict_list = [s.strip() for s in transitional_str.split('、')]
 
+all_word['转折归总词'] = transitional_dict_list
+del_word_list += transitional_dict_list
+
 file_path = "corpus/sentiment_transitional_dict.txt"
 f = open(file_path, "w+", encoding='UTF-8')
 for line in transitional_dict_list:
@@ -90,6 +99,8 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
 #%% 程度词典
 file_path = "sentiment_dict\HowNet_sentiment\程度级别词语（中文）.txt"
 print('********* file_path: ', file_path)
+
+all_word['程度词'] = []
 
 encode = get_txt_encode(file_path)
 
@@ -116,10 +127,12 @@ for index, line in enumerate(f):
         weight = weights
         continue
     
-    if len(line) > 0:
+    if (len(line) > 0) & (line not in degree_dict):
         print(line, weight)
         degree_dict_list.append([line, weight])
         degree_dict[line] = weight
+        all_word['程度词'].append(line)
+        del_word_list.append(line)
 f.close()
 
 file_path = "corpus/sentiment_degree_dict.txt"
@@ -210,7 +223,7 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
 #file_path = "sentiment_dict\\neg_words.txt"
 #emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -1)
 #%%
-def update_emotion_dict(emotion_dict, file_path, weight):
+def update_emotion_dict(emotion_dict, file_path, all_word, weight):
     print('********* file_path: ', file_path)
     encode = get_txt_encode(file_path) 
     f = open(file_path, 'r', encoding = encode)
@@ -218,8 +231,14 @@ def update_emotion_dict(emotion_dict, file_path, weight):
     for index, line in enumerate(f):
         line = line.replace('\n', '').strip()
         try :   
-            emotion_dict[line] = weight
-            if line not in emotion_dict:                
+            if (line not in emotion_dict) & (line not in del_word_list): 
+                emotion_dict[line] = weight
+                if weight < 0:
+                    all_word['负面词'].append(line)
+                else :
+                    all_word['正面词'].append(line)
+            
+#            if line not in emotion_dict:                
 #                emotion_dict[line] = [weight, file_path]
                 print('-- 不存在：', line)
         except Exception as e:
@@ -227,26 +246,36 @@ def update_emotion_dict(emotion_dict, file_path, weight):
             print(line)
     f.close()
     
-    return emotion_dict    
+    return emotion_dict, all_word    
     
 #%% 情感词典 -- 校正后
-filename_list = ['正面词_校正版_20181106.xlsx', 
-                 '负面词_校正版_20181026.xlsx', ]
+filename_list = ['负面词_校正版_20181026.xlsx',
+                 '正面词_校正版_20181106.xlsx', 
+                 '正面词_校正版_20181114.xlsx',
+                 '正面词_校正版_20181122.xlsx',
+                 '正面词_校正版_20181123.xlsx',
+                  ]
 
 emotion_dict = {}
+all_word['正面词'] = []
+all_word['负面词'] = []
+
 for filename in filename_list:
     file_path = 'sentiment_dict\\校正后词典_20181026\\' + filename
     tmp_data = pd.read_excel(file_path)
     for index in tmp_data.index:
         word = tmp_data.loc[index, 'word']
         weight = tmp_data.loc[index, 'weight']
-        if word not in emotion_dict:
+        if (word not in emotion_dict) & (word not in del_word_list):
             if weight < 0:
                 emotion_dict[word] = -1 # weight
+                all_word['负面词'].append(word)
             else :
                 emotion_dict[word] = 1
+                all_word['正面词'].append(word)
         else :
-            print('已存在： ', word)
+            print(file_path)
+            print('已存在： ', word) # , emotion_dict[word]
 
 #%% BosonNLP_sentiment_score
 #file_path = "sentiment_dict\BosonNLP_sentiment_score\BosonNLP_sentiment_score.txt"
@@ -271,17 +300,17 @@ for filename in filename_list:
 #%% 
 # circ
 file_path = "corpus\\circ_crisis_dict.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
+emotion_dict, all_word = update_emotion_dict(emotion_dict, file_path, all_word, weight = -2)
 
 file_path = "sentiment_dict\\校正后词典_20181026\\circ_neg_self_define.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
+emotion_dict, all_word = update_emotion_dict(emotion_dict, file_path, all_word, weight = -2)
 
 file_path = "sentiment_dict\\校正后词典_20181026\\circ_pos_self_define.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = 2)
+emotion_dict, all_word = update_emotion_dict(emotion_dict, file_path, all_word, weight = 2)
 
 # cbrc
 file_path = "corpus\\cbrc_warning_dict.txt"
-emotion_dict = update_emotion_dict(emotion_dict, file_path, weight = -2)
+emotion_dict, all_word = update_emotion_dict(emotion_dict, file_path, all_word, weight = -2)
 
 #%%
 file_path = "corpus/sentiment_emotion_dict.txt"
@@ -314,5 +343,128 @@ with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
 #
 #emotion_pd.head()
 #emotion_pd.to_excel("corpus/sentiment_emotion_dict.xlsx", index = False)
+
+     
+#%% 其他词
+filename_list = ['正面词_校正版_20181106 - 副本.xlsx', 
+                 '正面词_校正版_20181114 - 副本.xlsx',
+                 '正面词_校正版_20181122 - 副本.xlsx',
+                 '正面词_校正版_20181123 - 副本.xlsx',
+                  ]
+
+all_word['有负面含义的词'] = []
+all_word['中性'] = []
+
+for filename in filename_list:
+    file_path = 'sentiment_dict\\校正后词典_20181026\\' + filename
+    print()
+    print(file_path)
+    tmp_data = pd.read_excel(file_path, '有负面含义的词')
+    for index in tmp_data.index:
+        word = tmp_data.loc[index, 'word']
+        if word not in all_word['有负面含义的词']:
+            all_word['有负面含义的词'].append(word)
+        else :
+            print('--- 已存在：', word, all_word['有负面含义的词'][word])
+    print(  '共 %s 条数据'%(index +1))
+
+for filename in filename_list:
+    file_path = 'sentiment_dict\\校正后词典_20181026\\' + filename
+    print()
+    print(file_path)
+    tmp_data = pd.read_excel(file_path, '中性')
+    for index in tmp_data.index:
+        word = tmp_data.loc[index, 'word']
+        if word not in all_word['中性']:
+            all_word['中性'].append(word)
+        else :
+            print('--- 已存在：', word)
+    print(  '共 %s 条数据'%(index +1))
+
+#%% all word
+all_word['all_word'] = {}
+for word in all_word['否定词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '否定词'
+    else :
+        print('--- 否定词 已存在：', word, all_word['all_word'][word])
+
+for word in all_word['转折归总词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '转折归总词'
+    else :
+        print('--- 转折归总词 已存在：', word, all_word['all_word'][word])
+        
+for word in all_word['程度词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '程度词'
+    else :
+        print('--- 程度词 已存在：', word, all_word['all_word'][word])
+
+for word in all_word['正面词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '正面词'
+    else :
+        print('--- 正面词 已存在：', word, all_word['all_word'][word])
+        
+for word in all_word['负面词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '负面词'
+    else :
+        print('--- 负面词 已存在：', word, all_word['all_word'][word])
+                      
+for word in all_word['有负面含义的词']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '有负面含义的词'
+    else :
+        print('--- 有负面含义的词 已存在：', word, all_word['all_word'][word])
+        
+for word in all_word['中性']:
+    if word not in all_word['all_word']:
+        all_word['all_word'][word] = '中性'
+    else :
+        print('--- 中性 已存在：', word, all_word['all_word'][word])   
+
+#%%
+file_path = "corpus/all_word.txt"  
+
+with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
+    json.dump(all_word,json_file,ensure_ascii=False)
+
+#%%
+aa = pd.DataFrame.from_dict(all_word['all_word'], orient='index' )
+aa = aa.reset_index() 
+aa.columns = ['word', 'label']
+aa['label'].value_counts()
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

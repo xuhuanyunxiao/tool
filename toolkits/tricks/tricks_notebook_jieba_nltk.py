@@ -27,6 +27,11 @@ output_file = html_file_folder + '\\sdm_2_4_其他.html'
 output_HTML(current_file, output_file)
 
 
+# 显示文件夹中文件
+%env LS_COLORS = None 
+!tree --charset ascii  data/dogcat/
+
+
 # 忽略警告
 import warnings
 warnings.filterwarnings('ignore')
@@ -36,6 +41,33 @@ warnings.filterwarnings('ignore')
 %autoreload 2
 
 %matplotlib inline
+
+# 
+notebook info
+c.NotebookApp.ip = '192.168.30.220'
+c.NotebookApp.notebook_dir = u'/data/python_apps/jupyter_notebook'
+c.NotebookApp.open_browser = False
+c.NotebookApp.password = u'sha1:b1f662173fa0:59a209152386bdffe31a4c104b1bf217dbdd2f49'
+c.NotebookApp.port = 9000
+
+# 启动
+jupyter notebook --config /root/.jupyter/xh_jupyter_notebook_config.py --allow-root
+# 后台挂起
+nohup jupyter notebook --config /root/.jupyter/xh_jupyter_notebook_config.py --allow-root &
+# 关闭notebook
+lsof -i:9000  查看PID
+kill -9 pid
+
+# 本地
+http://192.168.30.220:9000
+123456
+
+# 安装扩展
+pip3 install jupyter_contrib_nbextensions
+jupyter contrib nbextension install --user
+
+# 如果没有出现扩展界面，可直接设置扩展
+http://192.168.30.220:9000/nbextensions?nbextension=varInspector/main
 
 
 #%% -----------------     jieba  ----------------------

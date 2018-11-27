@@ -42,6 +42,8 @@ import pandas as pd
 
 from pylab import mpl
 
+from toolkits.nlp.langconv import *
+
 #%% 中文相关
 def set_ch_pd():
     '''
@@ -79,6 +81,24 @@ def contain_ch(word, pattern = None):
     match = zh_pattern.search(word)
     
     return match # match.group() -- '中文'
+
+def Traditional2Simplified(sentence):
+    '''
+    将sentence中的繁体字转为简体字
+    :param sentence: 待转换的句子
+    :return: 将句子中繁体字转换为简体字之后的句子
+    '''
+    sentence = Converter('zh-hans').convert(sentence)
+    return sentence
+
+def Simplified2Traditional(sentence):
+    '''
+    将sentence中的简体字转为繁体字
+    :param sentence: 待转换的句子
+    :return: 将句子中简体字转换为繁体字之后的句子
+    '''
+    sentence = Converter('zh-hant').convert(sentence)
+    return sentence
 
 #%% 字符匹配
 def find_punctuation(data, pattern = None, add_punc = None, del_punc = None):

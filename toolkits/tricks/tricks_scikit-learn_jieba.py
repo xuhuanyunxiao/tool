@@ -96,6 +96,11 @@ for i in range(len(weight)):
     for j in range(len(word)):
         print(word[j], ':', weight[i][j], end=' ', sep='')
 
+from collections import Counter
+c = Counter(" ".join(corpus).split())
+# Counter对象方便之处在于它内置有most_common(n)方法，可以直接统计出前n个最高词频
+c.most_common(2)
+
 
 # 分割测试集、训练集  ----------------------
 from sklearn.model_selection import train_test_split
@@ -103,108 +108,51 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random
 
 # 并行处理  ----------------------
 # 整体并行处理 --------
-# 　　pipeline包提供了FeatureUnion类来进行整体并行处理：
-from numpy import log1p
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import Binarizer
-from sklearn.pipeline import FeatureUnion
- 
-#新建将整体特征矩阵进行对数函数转换的对象
-step2_1 = ('ToLog', FunctionTransformer(log1p))
-#新建将整体特征矩阵进行二值化类的对象
-step2_2 = ('ToBinary', Binarizer())
-#新建整体并行处理对象
-#该对象也有fit和transform方法，fit和transform方法均是并行地调用需要并行处理的对象的fit和transform方法
-#参数transformer_list为需要并行处理的对象列表，该列表为二元组列表，第一元为对象的名称，第二元为对象
-step2 = ('FeatureUnion', FeatureUnion(transformer_list=[step2_1, step2_2, step2_3]))
+# 　　pipeline包提供了FeatureUnion类来进行整体并行处理
+
 
 # 部分并行处理 --------
 # 　　整体并行处理有其缺陷，在一些场景下，我们只需要对特征矩阵的某些列进行转换，而不是所有列。
 #   pipeline并没有提供相应的类（仅OneHotEncoder类实现了该功能），需要我们在FeatureUnion的基础上进行优化：
-
-# 对特征矩阵的第1列（花的颜色）进行定性特征编码，
-# 对第2、3、4列进行对数函数转换，
-# 对第5列进行定量特征二值化处理。
-# 使用FeatureUnionExt类进行部分并行处理的代码如下：
-from numpy import log1p
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import Binarizer
+from sklearn.base import BaseEstimator, TransformerMixin
  
-#新建将部分特征矩阵进行定性特征编码的对象
-step2_1 = ('OneHotEncoder', OneHotEncoder(sparse=False))
-#新建将部分特征矩阵进行对数函数转换的对象
-step2_2 = ('ToLog', FunctionTransformer(log1p))
-#新建将部分特征矩阵进行二值化类的对象
-step2_3 = ('ToBinary', Binarizer())
-#新建部分并行处理对象
-#参数transformer_list为需要并行处理的对象列表，该列表为二元组列表，第一元为对象的名称，第二元为对象
-#参数idx_list为相应的需要读取的特征矩阵的列
-step2 = ('FeatureUnionExt', 
-        FeatureUnionExt(transformer_list=[step2_1, step2_2, step2_3], 
-                        idx_list=[[0], [1, 2, 3], [4]]))
-
-
-from sklearn.pipeline import FeatureUnion, _fit_one_transformer, _fit_transform_one, _transform_one 
-from sklearn.externals.joblib import Parallel, delayed
-from scipy import sparse
-import numpy as np
- 
-#部分并行处理，继承FeatureUnion
-class FeatureUnionExt(FeatureUnion):
-    #相比FeatureUnion，多了idx_list参数，其表示每个并行工作需要读取的特征矩阵的列
-    def __init__(self, transformer_list, idx_list, n_jobs=1, transformer_weights=None):
-        self.idx_list = idx_list
-        FeatureUnion.__init__(self, transformer_list=map(lambda trans:(trans[0], trans[1]), transformer_list), 
-            n_jobs=n_jobs, transformer_weights=transformer_weights)
- 
-    #由于只部分读取特征矩阵，方法fit需要重构
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
     def fit(self, X, y=None):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
-            self.transformer_list, self.idx_list)
-        transformers = Parallel(n_jobs=self.n_jobs)(
-            #从特征矩阵中提取部分输入fit方法
-            delayed(_fit_one_transformer)(trans, X[:,idx], y)
-            for name, trans, idx in transformer_idx_list)
-        self._update_transformer_list(transformers)
         return self
- 
-    #由于只部分读取特征矩阵，方法fit_transform需要重构
-    def fit_transform(self, X, y=None, **fit_params):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
-            self.transformer_list, self.idx_list)
-        result = Parallel(n_jobs=self.n_jobs)(
-            #从特征矩阵中提取部分输入fit_transform方法
-            delayed(_fit_transform_one)(trans, name, X[:,idx], y,
-                                        self.transformer_weights, **fit_params)
-            for name, trans, idx in transformer_idx_list)
- 
-        Xs, transformers = zip(*result)
-        self._update_transformer_list(transformers)
-        if any(sparse.issparse(f) for f in Xs):
-            Xs = sparse.hstack(Xs).tocsr()
-        else:
-            Xs = np.hstack(Xs)
-        return Xs
- 
-    #由于只部分读取特征矩阵，方法transform需要重构
     def transform(self, X):
-        transformer_idx_list = map(lambda trans, idx:(trans[0], trans[1], idx), 
-            self.transformer_list, self.idx_list)
-        Xs = Parallel(n_jobs=self.n_jobs)(
-            #从特征矩阵中提取部分输入transform方法
-            delayed(_transform_one)(trans, name, X[:,idx], self.transformer_weights)
-            for name, trans, idx in transformer_idx_list)
-        if any(sparse.issparse(f) for f in Xs):
-            Xs = sparse.hstack(Xs).tocsr()
-        else:
-            Xs = np.hstack(Xs)
-        return Xs
+        return [d[0] for d in X[:, self.attribute_names]]
+
+
+step1_1 = Pipeline([('title_sel', DataFrameSelector([0])), 
+                    ('title_features', myclass_circ.StatsFeatures_cor())])
+step1_2 = Pipeline([('content_sel', DataFrameSelector([1])), 
+                    ('content_features', FeatureUnion([
+        ('tf_idf', Pipeline([
+            ('counts', CountVectorizer(max_df=0.95, min_df=2)),
+            ('tf_idf', TfidfTransformer()),
+            ('chi', SelectKBest(chi2, k=2000))
+        ])),
+        ('len_stats', myclass_circ.StatsFeatures_tendency()),
+    ]))])
+
+pipeline = Pipeline([('cal_features', FeatureUnion(transformer_list=[
+                                                ("title_fea", step1_1),
+                                                ("content_fea", step1_2),])),
+                     ('standard', StandardScaler(with_mean=False)),
+                     ('classifier', XGBClassifier(max_depth=7,objective='multi:softmax', num_class=2))
+                 ])
+
+# pipeline_train = pipeline.fit(title_or_content, label)
+# X_features = pipeline_train.transform(title_or_content)
+# print(X_features.shape)
+pipeline.fit(X_train_1, y_train)
+print(pipeline.score(X_train_1, y_train))
+pipeline
+
 
 # pipeline ----------------------
-import psutil
-print ('获取内存占用率： '+(str)(psutil.virtual_memory().percent)+'%')
-
 # Pipeline、FeatureUnion
 # CountVectorizer、TfidfTransformer
 # cv_results_、best_score_、best_params_ 、、、、
@@ -218,41 +166,6 @@ from sklearn.svm import SVC
 # 其他都要执行fit_transform方法，且上一个工作输出作为下一个工作的输入。
 # 最后一个工作必须实现fit方法，输入为上一个工作的输出；
 # 但是不限定一定有transform方法，因为流水线的最后一个工作可能是训练！
-from numpy import log1p
-from sklearn.preprocessing import Imputer
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.preprocessing import FunctionTransformer
-from sklearn.preprocessing import Binarizer
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_selection import SelectKBest
-from sklearn.feature_selection import chi2
-from sklearn.decomposition import PCA
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
- 
-#新建计算缺失值的对象
-step1 = ('Imputer', Imputer())
-#新建将部分特征矩阵进行定性特征编码的对象
-step2_1 = ('OneHotEncoder', OneHotEncoder(sparse=False))
-#新建将部分特征矩阵进行对数函数转换的对象
-step2_2 = ('ToLog', FunctionTransformer(log1p))
-#新建将部分特征矩阵进行二值化类的对象
-step2_3 = ('ToBinary', Binarizer())
-#新建部分并行处理对象，返回值为每个并行工作的输出的合并
-step2 = ('FeatureUnionExt', 
-            FeatureUnionExt(transformer_list=[step2_1, step2_2, step2_3], 
-                idx_list=[[0], [1, 2, 3], [4]]))
-#新建无量纲化对象
-step3 = ('MinMaxScaler', MinMaxScaler())
-#新建卡方校验选择特征的对象
-step4 = ('SelectKBest', SelectKBest(chi2, k=3))
-#新建PCA降维的对象
-step5 = ('PCA', PCA(n_components=2))
-#新建逻辑回归的对象，其为待训练的模型作为流水线的最后一步
-step6 = ('LogisticRegression', LogisticRegression(penalty='l2'))
-#新建流水线处理对象
-#参数steps为需要流水线处理的对象列表，该列表为二元组列表，第一元为对象的名称，第二元为对象
-pipeline = Pipeline(steps=[step1, step2, step3, step4, step5, step6])
 
 pipeline = Pipeline([
     ('features', FeatureUnion([
