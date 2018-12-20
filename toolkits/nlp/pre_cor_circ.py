@@ -7,8 +7,13 @@ from string import digits
 import os
 dir_path = os.path.dirname(os.path.abspath(__file__))
 
+# from langconv import *
+from toolkits.nlp.langconv import *
+from toolkits.setup.specific_func import Traditional2Simplified
+
 stopwords = {}
-stw = open(dir_path + "/corpus/stopwords_20180904.txt", encoding='UTF-8')
+#stw = open(dir_path + "/corpus/stopwords_20180904.txt", encoding='UTF-8')
+stw = open(dir_path + "/corpus/chinese_stopwords.txt", encoding='UTF-8')
 for ws in stw:
     ws = ws.replace("\n", "")
     ws = ws.replace("\r", "")
@@ -27,6 +32,7 @@ def handle_contents(l_contents):
 def handle_content(content):
     content = str(content)
     raw = content.strip()
+    raw = Traditional2Simplified(raw) # 繁体字转简体字
     line = ""
     if raw != "":
         # 1 清理字符串
@@ -71,7 +77,7 @@ def clear_sen(sent):
     sent = sent.replace("(", "（")
     sent = sent.replace(")", "）")
 
-    reobj = re.compile(r"[^\u4e00-\u9f5a。！？“”，：、（）；<>]*")
+    reobj = re.compile(r"[^\u4e00-\u9fa5。！？“”，：、（）；<>]*")
     sent = reobj.sub("", sent)
 
     reobj = re.compile('//@(.*?)[:\s]')
@@ -100,8 +106,8 @@ def clear_sen(sent):
     # （文 徐维建 编辑 孙娟） （专栏作家 聂方义）（记者刘美群）（通讯员 郑浩）
     reobj = re.compile(r'(?<=（)[文|专栏作家|记者|通讯员| |微信号]*[\u4e00-\u9fa5 a-z]{0,}(?=）)')
     sent = reobj.sub("", sent)
-    reobj = re.compile(r'[责任编辑|更多关于]+[ ：:\u4e00-\u9fa5]*')
-    sent = reobj.sub("", sent)
+#    reobj = re.compile(r'[责任编辑|更多关于]+[ ：:\u4e00-\u9fa5]*')
+#    sent = reobj.sub("", sent)
     # (图)  (图片) (刘敬元)
     reobj = re.compile(r'[(?<=（)|(?<=\()][\u4e00-\u9fa5]{0,3}[(?=）)|(?=))]')
     sent = reobj.sub("", sent)
@@ -119,7 +125,7 @@ def clear_sen(sent):
 
 def etl(s):  
     # 去除标点和特殊字符
-    regex = re.compile(r"[^\u4e00-\u9f5aa-zA-Z0-9]")
+    regex = re.compile(r"[^\u4e00-\u9fa5a-zA-Z0-9]")
     s = regex.sub('', s)
 
     # 去除字符中的数字

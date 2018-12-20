@@ -239,7 +239,7 @@ def get_engine(types):
             engine = create_engine(DB_CON_STR, echo=False) 
             sql.execute('show databases', engine)    
     elif types == 'cbirc':
-        # 银保监会、人寿、建行
+        # 银保监会、人寿、建行、人保
         try:
             DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@10.31.149.216:5720/cbrc_circ?charset=utf8' 
             engine = create_engine(DB_CON_STR, echo=False)
@@ -248,7 +248,16 @@ def get_engine(types):
             DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@39.107.203.231:5720/cbrc_circ?charset=utf8'  
             engine = create_engine(DB_CON_STR, echo=False)
             cur = sql.execute('show databases', engine)  
-    
+    elif types == 'ahyjj':
+        # 安徽银监局
+        try:
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@10.31.184.133:5720/ahyjj?charset=utf8' 
+            engine = create_engine(DB_CON_STR, echo=False)
+            cur = sql.execute('show databases', engine)
+        except :
+            DB_CON_STR = 'mysql+pymysql://wisedb:Wi$eWeb321@47.94.59.63:5720/ahyjj?charset=utf8'  
+            engine = create_engine(DB_CON_STR, echo=False)
+            cur = sql.execute('show databases', engine)   
     return engine
 
 
