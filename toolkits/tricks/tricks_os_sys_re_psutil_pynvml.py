@@ -5,12 +5,15 @@ Created on Thu Oct 19 10:49:30 2017
 @author: xh
 """
 
+#%% -----------------     判断参数
+# 当函数的参数不确定时，可以使用*args 和**kwargs，*args 没有key值，**kwargs有key值
+
 if ('specific_func' not in dir()) | ('cal_func' not in dir()):
     from toolkits.setup import specific_func  
     from toolkits.setup import cal_func
 # from toolkits.setup.specific_func import set_ch_pd
 
-# 修改 logging 文件
+#%% -----------------     修改 logging 文件
 File "D:\software\conda\lib\logging\handlers.py", line 113, in rotate
     os.rename(source, dest)
 # 修改前
@@ -33,10 +36,11 @@ else:
     self.rotator(source, dest)
 
 
-### 
+#%% -----------------     
 # 在嵌套For循环中，将循环次数多的循环放在内侧，循环次数少的循环放在外侧，其性能会提高；
 # 减少循环变量的实例化，其性能也会提高。
 
+#%% -----------------  抛出异常
 raise Exception("Invalid level!",level) #强制触发异常,并传入两个参数
         # 触发异常后，后面的代码就不会再执行
 
@@ -72,13 +76,6 @@ for line in f.readlines():
 with open('/Users/michael/test.txt', 'w') as f:
     f.write('Hello, world!')
 
-#--  json
-with open("data/test_set.json",'w',encoding='utf-8') as json_file:
-    json.dump(test_set,json_file,ensure_ascii=False)
-
-with open("data/test_set.json",'r',encoding='utf-8') as json_file:
-    test_set=json.load(json_file)    
-
 # 追加内容
 # a
 # 打开一个文件用于追加（只写），写入内容为str
@@ -93,6 +90,12 @@ file = open('text.txt')
 print(file.read())
 file.close()
 
+# -------------  json
+with open("data/test_set.json",'w',encoding='utf-8') as json_file:
+    json.dump(test_set,json_file,ensure_ascii=False)
+
+with open("data/test_set.json",'r',encoding='utf-8') as json_file:
+    test_set=json.load(json_file) 
 
 #%% -----------------     re  ----------------------
 import re
@@ -151,12 +154,117 @@ sent = reobj.sub("", sent)
 reobj = re.compile(r'\(?(0\d{2,3})?[) -]?\d{7,8}')
 sent = reobj.sub("", sent)
 
+#%% -----------------     argparse  ----------------------
+# 是python的一个命令行解析包，非常编写可读性非常好的程序
+from argparse import Namespace
+
+# Arguments
+args = Namespace(
+    seed=1234,
+    data_file="titanic.csv",
+    train_size=0.75,
+    test_size=0.25,
+    num_epochs=100,
+)
+
+# Set seed for reproducability
+np.random.seed(args.seed)
+
 
 #%% -----------------     psutil  ----------------------
+# CPU、Memory等信息
 import psutil
-print ('获取内存占用率： '+(str)(psutil.virtual_memory().percent)+'%')
 
+#%% -----------------     总体
+users_count = len(psutil.users())
+print('用户数: ', users_count)
+for u in psutil.users():print(u)
 
+print('开机时间: ', datetime.datetime.fromtimestamp(psutil.boot_time ()).strftime("%Y-%m-%d %H: %M: %S"))
+print('CPU物理个数: ', psutil.cpu_count(logical=False))
+print('CPU逻辑个数: ', psutil.cpu_count())
+print('系统的CPU利用率: ')
+print(psutil.cpu_percent(None))
+time.sleep(2) 
+print(psutil.cpu_percent(None))
+
+memory = psutil.virtual_memory()
+print('内存利用率: ', psutil.virtual_memory().percent)
+print("Memory Total: %0.2f G"%(memory.total/1024/1024/1024)) # 总的内存大小
+print("Memory Free: %0.2f G "%(memory.free/1024/1024/1024)) # 剩余内存大小
+memory_used = memory.total - memory.free
+print("Memory Used: %0.2f G "%(memory_used/1024/1024/1024)) 
+print("Memory Used percent: %0.2f %% "%(memory_used/memory.total * 100))
+print('--------------')
+print("Memory Used percent: %0.2f %% "%(memory.percent))
+
+psutil.test() 
+
+#%% -----------------     特定
+# 查看系统全部进程
+for pnum in psutil.pids():
+    p = psutil.Process(pnum)
+    print(u"进程名 %-20s  内存利用率 %-18s 进程状态 %-10s 创建时间 %-10s " \
+    % (p.name(), p.memory_percent(), p.status(), p.create_time()))
+
+psutil.pids() # 查看系统全部进程
+p = psutil.Process(16031)
+p.name()      #进程名
+p.exe()         #进程的bin路径
+p.cwd()        #进程的工作目录绝对路径
+p.status()     #进程状态
+p.create_time()  #进程创建时间
+p.uids()      #进程uid信息
+p.gids()      #进程的gid信息
+p.cpu_times()    #进程的cpu时间信息,包括user,system两个cpu信息
+p.cpu_affinity()  #get进程cpu亲和度,如果要设置cpu亲和度,将cpu号作为参考就好
+p.memory_percent()  #进程内存利用率
+p.memory_info()    #进程内存rss,vms信息
+p.io_counters()    #进程的IO信息,包括读写IO数字及参数
+p.connectios()    #返回进程列表
+p.num_threads()  #进程开启的线程数
+
+# 听过psutil的Popen方法启动应用程序，可以跟踪程序的相关信息
+from subprocess import PIPE
+p = psutil.Popen(["/usr/bin/python", "-c", "print('hello')"],stdout=PIPE)
+p.name()
+p.username()
+
+#%% -----------------     pynvml  ----------------------
+# GPU 信息
+#python2
+pip install nvidia-ml-py2
+#python3
+pip install nvidia-ml-py3
+
+import pynvml
+
+pynvml.nvmlInit()
+print('显示驱动信息: ')
+print("Driver: ", pynvml.nvmlSystemGetDriverVersion()) 
+print('--------------')
+print('设备信息: ')
+deviceCount = pynvml.nvmlDeviceGetCount()
+print('  共 %s 块 GPU，名称为：'%deviceCount)
+for i in range(deviceCount):
+    handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+    print("    GPU", i, ":", pynvml.nvmlDeviceGetName(handle))
+print('--------------')
+for i in range(deviceCount):
+    print('查看第 %s 块GPU的显存、温度、风扇、电源: '%i)
+    handle = pynvml.nvmlDeviceGetHandleByIndex(i)
+    info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+    print("Memory Total: %0.2f G"%(info.total/1024/1024/1024)) # 总的显存大小
+    print("Memory Free: %0.2f G "%(info.free/1024/1024/1024)) # 剩余显存大小
+    print("Memory Used: %0.2f G "%(info.used/1024/1024/1024)) 
+    print("Memory Used percent: %0.2f %% "%(info.used/info.total*100))
+    print("Temperature is %d C"%(pynvml.nvmlDeviceGetTemperature(handle,0)))
+    print("Fan speed is ",pynvml.nvmlDeviceGetFanSpeed(handle))
+    print("Power ststus",pynvml.nvmlDeviceGetPowerState(handle))
+    print('--------------')
+
+#最后要关闭管理工具
+pynvml.nvmlShutdown()
 
 #%% -----------------     os  ----------------------
 os.listdir(r'c:\windows')
@@ -202,6 +310,7 @@ os.path.splitext('D:\software\Anaconda3\envs\py27\lib\os.py') # 分离扩展名
 # ('D:\\software\\Anaconda3\\envs\\py27\\lib\\os', '.py')
 os.path.splitdrive('D:\software\Anaconda3\envs\py27\lib\os.pyc')  #分离磁盘驱动器
 os.path.join("D:\software\Anaconda3\envs\py27\lib","os.pyc")  # 连接目录与文件名或目录
+os.path.normpath(path)    # 规范path字符串形式
 
 # os.walk(top[, topdown=True[, onerror=None[, followlinks=False]]])
 # topdown --可选，为 True，则优先遍历 top 目录，否则优先遍历 top 的子目录(默认为开启)。

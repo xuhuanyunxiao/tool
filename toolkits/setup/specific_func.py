@@ -40,8 +40,6 @@ import re
 import numpy as np
 import pandas as pd
 
-from pylab import mpl
-
 from toolkits.nlp.langconv import *
 
 #%% 中文相关
@@ -49,7 +47,7 @@ def set_ch_pd():
     '''
     功能：设定绘图时显示中文，pandas 显示
     '''	
-    # from pylab import mpl
+    from pylab import mpl
     mpl.rcParams['font.sans-serif'] = ['FangSong'] # 指定默认字体
     mpl.rcParams['axes.unicode_minus'] = False   # 解决保存图像是负号'-'显示为方块的问题
 

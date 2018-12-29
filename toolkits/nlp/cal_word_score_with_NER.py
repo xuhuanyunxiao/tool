@@ -5,16 +5,16 @@ import re
 import jieba
 import jieba.posseg as pseg
 from string import digits
-#import pre_cor_circ
+import pre_cor_circ
 
 #%%
-#from nltk.tag import StanfordNERTagger
-#chi_tagger = StanfordNERTagger('D:\software\stanford_nlp\chinese.misc.distsim.crf.ser.gz',
-#                               'D:\software\stanford_nlp\stanford-ner.jar')
+from nltk.tag import StanfordNERTagger
+chi_tagger = StanfordNERTagger('D:\software\stanford_nlp\chinese.misc.distsim.crf.ser.gz',
+                               'D:\software\stanford_nlp\stanford-ner.jar')
 
 #%%
 # 加载其他自定义词典
-jieba.load_userdict('corpus/insurance_dict_20180803.txt')
+jieba.load_userdict('corpus/bank_dict_20180814.txt')
 
 pos_flag = 'jsyh'
 
@@ -69,27 +69,30 @@ def get_pos_word(sentence):
         words = filter(lambda word_pos: (len(word_pos.word) > 0) and (word_pos.flag == pos_flag), 
                                          map(clear_word, pseg.cut(sentence)))  
         words_chain = set([w.word for w in words])
+#        for word, pos in words:        
+##            if pos == pos_flag:  # 公司主体     
+#                words_chain.add(word)
                 
         return words_chain
 
 #%%
-#def get_ner_org(sentence):
-#    ner_org = set()
-#    if sentence == '':
-#        return ner_org
-#    else :        
-#        words_pre = pre_cor_circ.handle_content(sentence)
-#        
-#        for word, tag in chi_tagger.tag(words_pre.split()):
-#            if (tag == 'ORGANIZATION') and (len(word) > 3):
-#                ner_org.add(word)
-#        return ner_org
+def get_ner_org(sentence):
+    ner_org = set()
+    if sentence == '':
+        return ner_org
+    else :        
+        words_pre = pre_cor_cbrc.handle_content(sentence)
+        
+        for word, tag in chi_tagger.tag(words_pre.split()):
+            if (tag == 'ORGANIZATION') and (len(word) > 3):
+                ner_org.add(word)
+        return ner_org
 
 def count_value(sentence, count_dict, weight, flag):    
     if flag == 'old':
         sentence_list = get_pos_word(sentence)
-#    elif flag == 'new':
-#        sentence_list = get_ner_org(sentence)
+    elif flag == 'new':
+        sentence_list = get_ner_org(sentence)
         
     if sentence_list:
         for s in sentence_list:
@@ -99,26 +102,14 @@ def count_value(sentence, count_dict, weight, flag):
                 count_dict[s] = count_dict[s] + sentence.count(s) * weight 
     return count_dict
 
-def cut_sentences(sentence):
-    '''
-    中文，依据标点符号分句：。！？
-    '''
-    puns = frozenset(u'。！？')
-    tmp = []
-    for ch in sentence:
-        tmp.append(ch)
-        if puns.__contains__(ch):
-            yield ''.join(tmp)
-            tmp = []
-    yield ''.join(tmp)
-    
 #%%
 def extract_abstract(titles, contents, dictionarys):
     load_mysql_dict(dictionarys)
     org_score = []
     for title, content in zip(titles, contents):
         content = clear_article(str(content))
-        sentences = [i.strip() for i in cut_sentences(content)]
+        cut_regex = r'。'
+        sentences = re.split(cut_regex, content)
         
         len_thres = 300
         old_content_dict = {}

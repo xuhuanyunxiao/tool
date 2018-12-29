@@ -12,23 +12,34 @@ pd.set_option('display.float_format', lambda x:'%.3f' %x) # 不采用科学计�
 import warnings  #  -----------------
 warnings.filterwarnings('ignore') # 为了整洁，去除弹出的warnings
 
+
+# groupby and pivot_table  -----------------
+stat = pd.pivot_table(students_list,index=["性别","民族","党派"],columns=["省份"],
+                      values=["计数"],aggfunc=np.sum, # values=["计数"],aggfunc=np.sum
+                      fill_value=0,margins=True)
+
+#  preprocess -----------------
+df = df.dropna()
+# Drop text based features (we'll learn how to use them in later lessons)
+features_to_drop = ["name", "cabin", "ticket"]
+df = df.drop(features_to_drop, axis=1)
+# pclass, sex, and embarked are categorical features
+categorical_features = ["pclass","embarked","sex"]
+df = pd.get_dummies(df, columns=categorical_features)
+
+clearn_data = clearn_data[clearn_data['年级'].isin(ex_list)]
+
+place_matrix = pd.concat([place_matrix,district],axis = 1)
+place_matrix = pd.merge(place_matrix,district,left_on = 'for_dist', right_on = 'for_coun')
+
 # 分割DataFrame中的某列数据  -----------------
 users_data = pd.DataFrame((str(x).split('::') for x in pd.DataFrame(users).iloc[:,0]),
                           columns = 'UserID::Gender::Age::Occupation::Zip-code'.split('::'))
-
-stat = pd.pivot_table(students_list,index=["性别","民族","党派"],columns=["省份"],
-                      values=["计数"],aggfunc=np.sum,
-                      fill_value=0,margins=True)
-
-province = place[place['symbol'].str.contains('0000')]
-province.columns = ['province_symbol','province_name']
 
 # 以下相似  -----------------
 province['for_coun'] = province['province_symbol'].apply(lambda x:x[0:2])
 combined_data['city_class'] = combined_data['城市级别'].apply(decide_class1) # decide_class1 自建函数
 cleaned_data['年份1'] = [decide_value(value) for value in cleaned_data[['体检年','年份']].values] # decide_value 自建函数
-
-place_matrix = pd.merge(place_matrix,district,left_on = 'for_dist', right_on = 'for_coun')
 
 place_matrix['county_name'][place_matrix['county_name'] =='城区'] = \
 place_matrix['district_name'][place_matrix['county_name'] =='城区'] + '_' + \
@@ -37,8 +48,6 @@ place_matrix['county_name'][place_matrix['county_name'] =='城区']
 useful_data['学段'] = useful_data['年级'].map({1:'小学低年级', 
                    2:'小学低年级',3:'小学中年级',4:'小学中年级', 5:'小学高年级',
                    6:'小学高年级',7:'初中',8:'初中',9:'初中', 10:'高中', 11:'高中', 12:'高中'})
-
-clearn_data = clearn_data[clearn_data['年级'].isin(ex_list)]
 
 # 多列运算
 kfold_result['R_W'] = kfold_result.apply(lambda x: 'Right' if x['label'] == x['predict_label'] else 'Wrong', axis = 1)
@@ -49,7 +58,6 @@ ages_data = grade_data[[True if (age[g-1] <= int(item) & int(item) <= age[g-1+4]
 stability_samples = stability_samples[(stability_samples['年份'] != 2010)  | (stability_samples['年级'] != 11)]
 circ_cor['publishtime'] = circ_cor['publishtime'].apply(lambda x: x.strftime("%Y-%m-%d %H-%M-%S"))
 
-
 # 用元组数据做index  -----------------
 tuples = useful_data.columns.tolist()
 tupless = [i for i in tuples if (i[1] == value_name) |(i[0] =='年级')|(i[0] =='年龄')|(i[0] =='学段')]
@@ -57,6 +65,17 @@ useful_data = useful_data.reindex(columns=pd.MultiIndex.from_tuples(tupless))
 
 # 插入列
 kfold_result.insert(0, '备注', '') # 第0列，列名，该列的值
+# 修改列名
+df.columns = ['a', 'b', 'c', 'd', 'e']
+province.columns = ['province_symbol','province_name']
+df.columns = df.columns.str.strip('$')
+df.columns = df.columns.map(lambda x:x[1:])
+df.rename(columns=lambda x:x.replace('$',''), inplace=True)
+# 只修改特定的列
+df.rename(columns={'$a': 'a', '$b': 'b'}, inplace=True) 
+
+# pandas and str
+province = place[place['symbol'].str.contains('0000')]
 
 # 将某列设为index
 address_matrix = pd.DataFrame(address_matrix, 

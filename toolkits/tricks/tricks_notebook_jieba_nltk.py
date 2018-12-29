@@ -6,8 +6,110 @@ Created on Thu Oct 19 10:49:30 2017
 """
 
 #%% -----------------     jupyter notebook  ----------------------
+# 键盘快捷方式的方法，以及学习它们的方便方法是使用：Cmd + Shift + P
+# （或者在Linux和Windows上使用Ctrl + Shift + P）。 
+# 此对话框可帮助你按名称运行任何命令 - 
+# 如果你不知道某个操作的键盘快捷方式，
+# 或者您想要执行的操作没有键盘快捷键，则可以使用该对话框。
 
-# 自动输出 HTML 文件
+# 在最后一行阻止函数的输出是很方便的，例如绘图时。 要做到这一点，你只需在最后添加一个分号
+
+?str.replace() # 帮助
+
+# 多个指针同步编辑，类似Sublime Text编辑器。按下Alt键并拖拽鼠标即可实现。
+
+# %符号是jupyter notebook里的魔术命令 ----------------------
+# ％env：设置环境变量
+#Running %env without any arguments
+#lists all environment variables
+#The line below sets the environment
+#variable OMP_NUM_THREADS
+%env OMP_NUM_THREADS=4
+env:OMP_NUM_THREADS=4
+
+# ％run：执行python代码
+# ％run可以从.py文件中执行python代码，鲜为人知的是，它也可以执行其他jupyter notebooks，相当有用。
+# 请注意，使用％run与导入python模块不同。
+#this will execute and show the output from
+#all code cells of the specified notebook
+%run ./two-histograms.ipynb
+
+# ％load：从外部脚本插入代码
+# 这将用外部脚本替换单元格的内容。 你可以使用计算机上的文件作为源，也可以使用URL。
+#Before Running
+%load ./hello_world.py
+# After Running
+# %load ./hello_world.py
+if __name__ == "__main__":
+    print("Hello World!")
+# Hello World!
+
+# ％store：在笔记本之间传递变量
+# ％store命令可以让你在两个不同的文件之间传递变量。
+data = 'this is the string I want to pass to different notebook'
+%store data
+del data # This has deleted the variable
+Stored 'data' (str)
+# new
+%store -r data
+print(data)
+# this is the string I want to pass to different notebook
+
+# ％who：列出全局范围的所有变量
+# 没有任何参数的％who命令将列出全局范围中存在的所有变量。 
+# 传递像str这样的参数将仅列出该类型的变量。
+one = "for the money"
+two = "for the show"
+three = "togetready nowgocat go"
+%who str
+# one three two
+
+# 有两个IPython Magic命令对时间有效 - %%time和％timeit。
+# %%time会给你关于单元中的代码的单一运行的信息。
+%%time
+import time
+for_ in range(1000):
+    time.sleep(0.01)# sleepfor0.01seconds
+
+%timeit numpy.random.normal(size=100)
+
+# %% writefile magic将该单元格的内容保存到外部文件中。 
+# ％pycat会做相反的处理，并显示（在弹出窗口中）外部文件高亮内容
+%%writefile pythoncode.py
+%pycat pythoncode.py
+
+# %prun: Show how much time your program spent in each function
+%prun some_useless_slow_function()
+
+# ％pdb进行调试
+# 输出Retina notebooks的高分辨率绘图
+%config InlineBackend.figure_format = 'retina'
+
+# 编写LaTeX ----------------------
+# 当你在Markdown单元格中编写LaTeX时，使用MathJax将其渲染为公式。
+# $$ P(A mid B) = frac{P(B mid A) , P(A)}{P(B)} $$
+
+# 运行不同语言 ----------------------
+%%bash
+%%HTML
+%%python2
+%%python3
+%%ruby
+%%perl
+%%R
+
+%%bash
+for i in {1..5}
+do
+   echo "$i"
+done
+
+# ！符号是执行shell的命令 ----------------------
+!ls
+!apt-get install graphviz
+!pip install pydotplus
+
+# 自动输出 HTML 文件  ----------------------
 def output_HTML(read_file, output_file):
     from nbconvert import HTMLExporter
     import codecs
@@ -27,22 +129,22 @@ output_file = html_file_folder + '\\sdm_2_4_其他.html'
 output_HTML(current_file, output_file)
 
 
-# 显示文件夹中文件
+# 显示文件夹中文件  ----------------------
 %env LS_COLORS = None 
 !tree --charset ascii  data/dogcat/
 
 
-# 忽略警告
+# 忽略警告  ----------------------
 import warnings
 warnings.filterwarnings('ignore')
 
-# 自动重新加载更改的模块
+# 自动重新加载更改的模块  ----------------------
 %load_ext autoreload
 %autoreload 2
 
 %matplotlib inline
 
-# 
+#   ----------------------
 notebook info
 c.NotebookApp.ip = '192.168.30.220'
 c.NotebookApp.notebook_dir = u'/data/python_apps/jupyter_notebook'
@@ -50,7 +152,7 @@ c.NotebookApp.open_browser = False
 c.NotebookApp.password = u'sha1:b1f662173fa0:59a209152386bdffe31a4c104b1bf217dbdd2f49'
 c.NotebookApp.port = 9000
 
-# 启动
+# 启动  ----------------------
 jupyter notebook --config /root/.jupyter/xh_jupyter_notebook_config.py --allow-root
 # 后台挂起
 nohup jupyter notebook --config /root/.jupyter/xh_jupyter_notebook_config.py --allow-root &
@@ -62,12 +164,26 @@ kill -9 pid
 http://192.168.30.220:9000
 123456
 
-# 安装扩展
+# 安装扩展  ----------------------
 pip3 install jupyter_contrib_nbextensions
 jupyter contrib nbextension install --user
 
 # 如果没有出现扩展界面，可直接设置扩展
 http://192.168.30.220:9000/nbextensions?nbextension=varInspector/main
+
+
+# 创建幻灯片文件  ----------------------
+# 在保存的目录之下，执行下面命令：
+jupyter nbconvert add_and_warn_4.ipynb --to slides --post serve
+jupyter nbconvert --to slides --ServePostProcessor.port=8910 --post serve add_and_warn_4.ipynb
+
+# 要在notebook创建幻灯片文件，你需要使用 nbconvert:
+jupyter nbconvert notebook.ipynb --to slides
+
+# 希望转换后立刻看见结果，使用：
+jupyter nbconvert notebook.ipynb --to slides --post serve
+jupyter nbconvert add_and_warn_4.ipynb --to slides --reveal-prefix reveal.js
+jupyter nbconvert add_and_warn_4.ipynb --to slides --reveal-prefix reveal.js --post serve --ServePostProcessor.port=8910
 
 
 #%% -----------------     jieba  ----------------------

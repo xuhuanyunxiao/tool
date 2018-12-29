@@ -13,7 +13,8 @@ from toolkits.nlp.langconv import *
 from toolkits.setup.specific_func import Traditional2Simplified
 
 stopwords = {}
-stw = open(dir_path + "/corpus/chinese_stopwords.txt", encoding='UTF-8')
+stw = open(os.path.normpath(dir_path + r"/corpus/chinese_stopwords.txt"), 
+           "r", encoding='UTF-8')
 for ws in stw:
     ws = ws.replace("\n", "")
     ws = ws.replace("\r", "")
@@ -21,8 +22,8 @@ for ws in stw:
 stw.close()
 
 # jieba.load_userdict('corpus/company.txt')
-jieba.load_userdict(dir_path + '/corpus/bank_dict_20180814.txt') # 合并了 user_dict.txt
-jieba.load_userdict(dir_path + '/corpus/neg_words_20180704.txt')
+jieba.load_userdict(os.path.normpath(dir_path + '/corpus/bank_dict_20180814.txt')) # 合并了 user_dict.txt
+jieba.load_userdict(os.path.normpath(dir_path + '/corpus/neg_words_20180704.txt'))
 
 def handle_contents(l_contents):
     lines = []
@@ -112,7 +113,13 @@ def clear_sen(sent):
     # sent = reobj.sub("", sent)
     # （文 徐维建 编辑 孙娟） （专栏作家 聂方义）（记者刘美群）（通讯员 郑浩）
     reobj = re.compile(r'(?<=（)[文|专栏作家|记者|通讯员| |微信号]*[\u4e00-\u9fa5 a-z]{0,}(?=）)')
-    sent = reobj.sub("", sent)
+#    sent = reobj.sub("", sent)
+    con_find = reobj.findall(sent)
+    if con_find:
+        if (sent.find('记者')>0) & (sent.find('记者')<25):
+            sent = sent[sent.find('记者')-2:]
+    
+    sent = reobj.sub("", sent)  
 #    reobj = re.compile(r'[责任编辑|更多关于]+[ ：:\u4e00-\u9fa5]*')
 #    sent = reobj.sub("", sent)
     # (图)  (图片) (刘敬元)

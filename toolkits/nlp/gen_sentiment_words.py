@@ -438,32 +438,61 @@ aa.columns = ['word', 'label']
 aa['label'].value_counts()
 
 #%%
+import json
+from toolkits.setup.specific_func import get_txt_encode
+import pandas as pd
+import os
+
+with open("sentiment_dict/all_word_20181221.json",'r',encoding='utf-8') as json_file:
+    all_word=json.load(json_file)
+    
+#%%
+neg = set()
+f = open(os.path.normpath("sentiment_dict/校正后词典_20181026/neg_words_20180704.txt"),
+         "r+", encoding='UTF-8')
+for content in f:
+    neg.add(content.strip())
+f.close()
+neg = list(neg)
+
+print("前-- len(all_word['负面词']): ", len(all_word['负面词']))
+for n in neg:
+    if n not in all_word['负面词']:
+        all_word['负面词'].append(n)
+#    else :
+#        print(n)
+
+print("后-- len(all_word['负面词']): ", len(all_word['负面词']))
+
+#%%
+new_word = pd.read_excel('sentiment_dict/校正后词典_20181026/正负词_扩充版_20181218.xlsx')
+
+print("前-- len(all_word['负面词']): ", len(all_word['负面词']))
+print("前-- len(all_word['正面词']): ", len(all_word['正面词']))
+print("前-- len(all_word['中性']): ", len(all_word['中性']))
+
+for index in new_word.index:
+    label = new_word.loc[index, 'label']
+    word = new_word.loc[index, 'word']
+    if label == -1:
+        all_word['负面词'].append(word)
+    elif label == 1:
+        all_word['正面词'].append(word)
+    elif label == 0:
+        all_word['中性'].append(word)
+
+print("后-- len(all_word['负面词']): ", len(all_word['负面词']))
+print("后-- len(all_word['正面词']): ", len(all_word['正面词']))
+print("后-- len(all_word['中性']): ", len(all_word['中性']))
 
 
+#%%
+file_path = "corpus/all_word_20181221.txt"  
+with open(file_path.replace('txt', 'json'),'w',encoding='utf-8') as json_file:
+    json.dump(all_word,json_file,ensure_ascii=False)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#%%
 
 
 
