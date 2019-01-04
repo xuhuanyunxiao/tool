@@ -57,6 +57,15 @@ for index, class_name in enumerate(list(np.unique(label))):
     plt.show()
 #     wordcloud.to_file('test.png')
 
+#%% -----------------     scikit learn  ----------------------
+
+
+
+
+
+
+
+
 
 #%% -----------------     scikit learn  ----------------------
 #%% 加载数据集  ----------------------

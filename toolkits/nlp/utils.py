@@ -27,6 +27,16 @@ for ws in stw:
     stopwords[ws] = 1
 stw.close()
 
+from sklearn.base import BaseEstimator, TransformerMixin
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X):
+        return [d[0] for d in X[:, self.attribute_names]]
+
+
 #%%
 #def cut_sentences(sentence):
 #    '''
@@ -49,7 +59,6 @@ def cut_sentences(para):
     para = para.rstrip()       # 段尾如果有多余的\n就去掉它
     #很多规则中会考虑分号;，但是这里我把它忽略不计，破折号、英文双引号等同样忽略，需要的再做些简单调整即可。
     return para.split("\n")
-
 
 def clear_sen(sent):
     '''
