@@ -11,7 +11,7 @@ import json
 class StatsFeatures_cor_circ(BaseEstimator, TransformerMixin):    
     def __init__(self):
         self.corpus_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.corpus_path)
+        # print(self.corpus_path)
         
         self.neg = set()
         f = open(os.path.normpath(self.corpus_path + "/corpus/neg_words.txt"),
@@ -87,7 +87,7 @@ class StatsFeatures_cor_circ(BaseEstimator, TransformerMixin):
 class StatsFeatures_cor_cbrc(BaseEstimator, TransformerMixin):    
     def __init__(self):
         self.corpus_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.corpus_path)
+        # print(self.corpus_path)
         
         self.neg = set()
         f = open(os.path.normpath(self.corpus_path + "/corpus/neg_words.txt"),
@@ -163,7 +163,7 @@ class StatsFeatures_cor_cbrc(BaseEstimator, TransformerMixin):
 class Statskeywords_cor(BaseEstimator, TransformerMixin):    
     def __init__(self, topk = 100, types = 'circ'):
         self.corpus_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.corpus_path)
+        # print(self.corpus_path)
         
         self.topk = topk
         

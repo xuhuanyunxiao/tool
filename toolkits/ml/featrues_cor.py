@@ -241,7 +241,7 @@ def get_feature_cor_title_cbrc(title_or_content, label):
 					        ('tf_idf', Pipeline([
 					            ('counts', CountVectorizer(max_df=0.95, min_df=2)),
 					            ('tf_idf', TfidfTransformer()),
-					            ('chi', SelectKBest(chi2, k=20000))
+					            ('chi', SelectKBest(chi2, k=15000))
 					        ])),
 					        ('len_stats', myclass_cor.StatsFeatures_cor_cbrc()),
 	        				('tf', myclass_cor.Statskeywords_cor(topk = 5000,types = 'cbrc'))

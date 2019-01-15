@@ -28,6 +28,7 @@ for ws in stw:
 stw.close()
 
 from sklearn.base import BaseEstimator, TransformerMixin
+
 class DataFrameSelector(BaseEstimator, TransformerMixin):
     def __init__(self, attribute_names):
         self.attribute_names = attribute_names
@@ -36,7 +37,18 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     def transform(self, X):
         return [d[0] for d in X[:, self.attribute_names]]
 
+class DenseTransformer(TransformerMixin):
+    '''spare data to dense data'''
+    def transform(self, X, y=None, **fit_params):
+        return X.todense()
 
+    def fit_transform(self, X, y=None, **fit_params):
+        self.fit(X, y, **fit_params)
+        return self.transform(X)
+
+    def fit(self, X, y=None, **fit_params):
+        return self
+    
 #%%
 #def cut_sentences(sentence):
 #    '''
@@ -364,3 +376,38 @@ def extract_abstract(title, content, dictionarys, pos_flag):
                     
     return org_score_list, vip_word, key_sentence, purity
 #%%
+def title_content_label(filepath):
+    '''导入预处理后的数据 txt文件'''
+    
+    filename = filepath + 'titles.txt'
+    title = []
+    fid = open(filename, "r+", encoding='UTF-8')
+    for f in fid:
+        title.append(f.strip().replace('\n', ''))
+    fid.close()
+    print('title num: ', len(title))
+    print(title[:2])
+    
+    content = []
+    filename = filepath + 'contents.txt'
+    fid = open(filename, "r+", encoding='UTF-8')
+    for f in fid:
+        content.append(f.strip().replace('\n', ''))
+    fid.close()
+    print('content num: ', len(content))
+    # content[:2]
+    
+    title_content = [t + ' ' + c for t,c in zip(title, content)]
+    print('title_content num: ', len(title_content))
+    
+    label = []
+    filename = filepath + 'labels.txt'
+    fid = open(filename, "r+", encoding='UTF-8')
+    for f in fid:
+        label.append(f.strip().replace('\n', ''))
+    fid.close()
+    print('label num: ', len(label))
+    print(label[:5])
+    
+    return title_content, label
+

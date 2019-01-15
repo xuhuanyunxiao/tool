@@ -49,7 +49,7 @@ def del_mysql_dict(dictionarys):
             continue
 
 #%%
-def evaluate_article(classify_id_list, title, content, dictionarys):
+def evaluate_article(classify_id_tendency, title, content, dictionarys):
     '''
     计算一篇文章倾向、以及每个主体的倾向
     '''
@@ -82,17 +82,16 @@ def evaluate_article(classify_id_list, title, content, dictionarys):
     org_score_list = []
     org_sentences_pos_word_weight = []
     if len(pre_sentences) > 0:
-        org_list, org_loc, aka_name_dict = utils_tendency.get_entity_new(pre_sentences, sentences, dictionarys)                    
+        org_list, org_loc, aka_name_dict = utils_tendency.get_entity_new(pre_sentences, 
+                                                                         sentences, 
+                                                                         dictionarys)                    
         org_score_dict, org_sen_loc, \
         org_sentences_pos_word_weight = utils_tendency.cal_sentences_tendency_new(pre_sentences, 
                                                                org_loc, sentences)    
 
         for cpn in org_list:
-            # 选出 保险机构 用于判断倾向性 （classify_id)
-#            保监会用于判断倾向的classify_id：6
-#            中国人寿用于判断倾向的classify_id：21、27、29
-#            if cpn['classify_id'] in classify_id_list:
-            if cpn['classify_id'] in [6, 21, 27, 29]:
+            # 判断倾向性 （classify_id) :不在list 中则为 非负
+            if cpn['classify_id'] in classify_id_tendency:
                 try :
                     cpn['org_tendency_score'] = org_score_dict[cpn['name']]
                 except:
@@ -124,27 +123,15 @@ def evaluate_article(classify_id_list, title, content, dictionarys):
     return chapter_tendency_score, org_score_list
 #    return chapter_tendency_score, org_score_list, title_score, content_score, title_rule_index, title_pos_word, org_sentences_pos_word_weight
 
-def process_articles(types, titles, contents, dictionarys):
+def process_articles(classify_id_tendency, titles, contents, dictionarys):
     load_mysql_dict(dictionarys)
-    
-    types = str(types)
-    if types == '1':
-        classify_id_list = []
-    elif types == '2':
-        classify_id_list = []
-    elif types == '3':
-        classify_id_list = []  
-    elif types == '4':
-        classify_id_list = []
-    elif types == '5':
-        classify_id_list = []         
-    else :
-        raise Exception("Invalid types!",'there is no types.')
-    
+
     org_res = []
     chapter_res = []
     for title, content in zip(titles, contents):
-        chapter_tendency_score, org_score_list = evaluate_article(classify_id_list, title, content, dictionarys)
+        chapter_tendency_score, org_score_list = evaluate_article(classify_id_tendency, 
+                                                                  title, content, 
+                                                                  dictionarys)
         chapter_res.append(chapter_tendency_score)
         org_res.append(org_score_list)
         

@@ -68,6 +68,12 @@ for index, class_name in enumerate(list(np.unique(label))):
 
 
 #%% -----------------     scikit learn  ----------------------
+
+#%% save and load model  ----------------------
+from sklearn.externals import joblib
+joblib.dump(clf, "model/previous_model/cbrc_pipeline_20181108.pkl.z")
+pipeline_train = joblib.load( "model/previous_model/cbrc_pipeline_20181108.pkl.z")
+
 #%% 加载数据集  ----------------------
 from sklearn.datasets import load_iris
 iris=load_iris()

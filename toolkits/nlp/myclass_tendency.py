@@ -12,7 +12,7 @@ class StatsFeatures_tendency(BaseEstimator, TransformerMixin):
     
     def __init__(self):
         self.corpus_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.corpus_path)
+        # print(self.corpus_path)
         
 #        self.neg = set()
 #        f = open(os.path.normpath(self.corpus_path + "/corpus/neg_words.txt"),
@@ -111,7 +111,7 @@ class StatsFeatures_warn(BaseEstimator, TransformerMixin):
     
     def __init__(self):
         self.corpus_path = os.path.dirname(os.path.abspath(__file__))
-        print(self.corpus_path)
+        # print(self.corpus_path)
         
         self.neg = set()
         f = open(os.path.normpath(self.corpus_path + "/corpus/neg_words.txt"),

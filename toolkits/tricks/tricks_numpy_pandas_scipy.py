@@ -74,6 +74,9 @@ df.rename(columns=lambda x:x.replace('$',''), inplace=True)
 # 只修改特定的列
 df.rename(columns={'$a': 'a', '$b': 'b'}, inplace=True) 
 
+# df 和 df2 中相同的列
+same_var = df.columns.intersection(df2).tolist()
+
 # pandas and str
 province = place[place['symbol'].str.contains('0000')]
 

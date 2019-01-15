@@ -9,18 +9,17 @@ dir_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def title_content_label(filepath):
-	'''
-	导入预处理后的数据 txt文件
-	'''
-    title = []
+    '''导入预处理后的数据 txt文件'''
+    
     filename = filepath + 'titles.txt'
+    title = []
     fid = open(filename, "r+", encoding='UTF-8')
     for f in fid:
         title.append(f.strip().replace('\n', ''))
     fid.close()
     print('title num: ', len(title))
     print(title[:2])
-
+    
     content = []
     filename = filepath + 'contents.txt'
     fid = open(filename, "r+", encoding='UTF-8')
@@ -29,10 +28,10 @@ def title_content_label(filepath):
     fid.close()
     print('content num: ', len(content))
     # content[:2]
-
+    
     title_content = [t + ' ' + c for t,c in zip(title, content)]
     print('title_content num: ', len(title_content))
-
+    
     label = []
     filename = filepath + 'labels.txt'
     fid = open(filename, "r+", encoding='UTF-8')
@@ -45,9 +44,7 @@ def title_content_label(filepath):
     return title_content, label
 
 class DenseTransformer(TransformerMixin):
-	'''
-	spare data to dense data
-	'''
+    '''spare data to dense data'''
     def transform(self, X, y=None, **fit_params):
         return X.todense()
 
