@@ -358,7 +358,6 @@ select name,submittime
 -- 每个时间对应了一个唯一的UNIX时间戳，该时间戳是从'1970-01-01 00:00:00' 为0开始计时，每秒增加1。
 -- MySql内置了传统时间和UNIX时间的互换函数，分别为
 -- UNIX_TIMESTAMP(datetime)
--- FROM_UNIXTIME(unixtime)
 select count(*) 
 	from sometable 
 		where datetimecolumn>=UNIX_TIMESTAMP('2010-03-01 00:00:00') and
@@ -368,6 +367,15 @@ select count(*)
 	from sometable 
 		where datetimecolumn>='2010-03-01 00:00:00' and
 			datetimecolumn<'2010-03-02 00:00:00';
+
+# UNIX 时间
+-- FROM_UNIXTIME(unixtime)
+SELECT 
+    FROM_UNIXTIME(add_time, '%Y-%m-%d %H'), COUNT(id)
+FROM
+    baidu_gather.content_shedu_tieba
+GROUP BY FROM_UNIXTIME(add_time, '%Y-%m-%d %H')
+ORDER BY FROM_UNIXTIME(add_time, '%Y-%m-%d %H') desc;
 
 ## #####  多表查询
 SELECT 
@@ -469,7 +477,35 @@ SELECT count(id) FROM text_signatures.wise_web_signatures_middle;
 
 SELECT count(id) FROM text_signatures.wise_simi_result;
 
-
+# 条件组合 
+SELECT 
+    a.rep_url,
+    CASE a.rep_title
+        WHEN '' THEN 'empty'
+        ELSE a.rep_title
+    END rep_title,
+    CASE a.ori_title
+        WHEN '' THEN 'empty'
+        ELSE a.ori_title
+    END ori_title,
+    a.ori_from,
+    CASE a.user
+        WHEN '' THEN '无用户名'
+        ELSE a.user
+    END user,
+    b.tieba_person_index,
+    a.rep_time,
+    CASE a.img_url
+        WHEN '' THEN 'empty'
+        ELSE a.img_url
+    END img_url,
+    FROM_UNIXTIME(a.add_time, '%Y-%m-%d') add_time
+FROM
+    baidu_gather.content_shedu_tieba a,
+    baidu_gather.user_shedu_tieba b
+WHERE
+    a.account_id = b.user_id
+        AND a.add_time >= '1550764800';
 
 
 

@@ -363,11 +363,40 @@ clf = make_pipeline(preprocessing.StandardScaler(), svm.SVC(C=1))
 cross_val_score(clf, iris.data, iris.target, cv=cv)
 
 
-# 回归模型评价指标
+# 回归模型评价指标  ----------------------
 print('平均绝对误差（MAE）：', metrics.mean_absolute_error(y_test, y_predict)) 
 print('平均方差（MSE）：', metrics.mean_squared_error(y_test, y_predict)) 
 print('R平方值：', metrics.r2_score(y_test, y_predict)) 
 print('中值绝对误差：', metrics.median_absolute_error(y_test, y_predict)) 
+
+# 聚类模型评价指标  ----------------------
+from sklearn import metrics
+
+def clustering_metrics(labels_pred, labels_true = None, feature = None):
+    '''
+    聚类算法结果评估
+    需要真实标签：
+        兰德指数 ARI: 输入参数没有顺序要求，ARI值的范围是[-1,1]，
+            负的结果都是较差的，说明标签是独立分布的，相似分布的ARI结果是正的，
+            1是最佳结果，说明两种标签的分布完全一致
+        互信息 AMI：输入参数没有顺序要求，最好的值为1，最差的值（与labels_true不相关），其结果为非正值
+        同质性、完整性、两者的调和平均V-measure：从0到1反应出最差到最优的表现
+        Fowlkes-Mallows指数：针对训练集和验证集数据之间求得的查全率和查准率的几何平均值
+        
+    不需要真实标签：        
+        轮廓系数：取值范围是[-1,1]，同类别样本距离越相近不同类别样本距离越远，分数越高。
+        Calinski-Harabaz Index：分数值越大则聚类效果越好        
+    '''
+    
+    if labels_true is not None:
+        print u'兰德指数 ARI: ', metrics.adjusted_rand_score(labels_true, labels_pred)
+        print u'互信息 AMI: ', metrics.adjusted_mutual_info_score(labels_true, labels_pred)
+        print u'同质性、完整性、两者的调和平均V-measure: ', metrics.homogeneity_completeness_v_measure(labels_true, labels_pred)
+        print u'Fowlkes-Mallows指数 FMI: ', metrics.fowlkes_mallows_score(labels_true, labels_pred)
+        
+    if feature is not None:
+        print u'轮廓系数: ', metrics.silhouette_score(feature, labels_pred, metric='euclidean')
+        print u'Calinski-Harabaz Index: ', metrics.calinski_harabaz_score(feature, labels_pred) 
 
 
 # 稀疏数据转换 ----------------------

@@ -13,6 +13,9 @@ if ('specific_func' not in dir()) | ('cal_func' not in dir()):
     from toolkits.setup import cal_func
 # from toolkits.setup.specific_func import set_ch_pd
 
+# 开发模式安装包，可及时更新文件
+python setup.py develop
+
 #%% -----------------     修改 logging 文件
 File "D:\software\conda\lib\logging\handlers.py", line 113, in rotate
     os.rename(source, dest)
@@ -41,6 +44,7 @@ else:
 # 减少循环变量的实例化，其性能也会提高。
 
 #%% -----------------  抛出异常
+level = 'There is no data!'
 raise Exception("Invalid level!",level) #强制触发异常,并传入两个参数
         # 触发异常后，后面的代码就不会再执行
 
@@ -119,6 +123,16 @@ res = s.translate(remove_digits)
 print(remove_digits)
 res    
 
+contents = 'Copyright&copy;1997-2017bywww.people.com.cn.allrightsreserved'
+zhmodel = re.compile(u'[\u4e00-\u9fa5]')    #检查中文
+#zhmodel = re.compile(u'[^\u4e00-\u9fa5]')   #检查非中文
+# contents = u'（2014）深南法民二初字第280号'
+match = zhmodel.search(contents)
+if match:
+    print(contents)
+else:
+    print(u'没有包含中文')
+
 
 # URL 
 reobj = re.compile(r'(http|ftp|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:/~\+#]*[\w\-\@?^=%&amp;/~\+#])?')
@@ -153,6 +167,11 @@ sent = reobj.sub("", sent)
 # 固定电话
 reobj = re.compile(r'\(?(0\d{2,3})?[) -]?\d{7,8}')
 sent = reobj.sub("", sent)
+# 日期
+#  '2017年04月25日11:25:44'
+#  '2017年04月25日11:25'
+reobj = re.compile(r'[0-9]{2}[:|：][0-9]{2}[:|：]?[0-9]{0,2}')
+match = reobj.search(sent)
 
 #%% -----------------     argparse  ----------------------
 # 是python的一个命令行解析包，非常编写可读性非常好的程序

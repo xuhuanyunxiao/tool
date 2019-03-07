@@ -1,6 +1,7 @@
 README.rst
 setup.py
 toolkits/__init__.py
+toolkits/db_conn.py
 toolkits.egg-info/PKG-INFO
 toolkits.egg-info/SOURCES.txt
 toolkits.egg-info/dependency_links.txt
