@@ -76,6 +76,7 @@ corpus = ["我 来到 北京 清华大学",
         "我 爱 北京 天安门"]
  
 # token_pattern指定统计词频的模式, 不指定, 默认如英文, 不统计单字
+# ('counts', CountVectorizer(max_df=0.95, min_df=2)
 vectorizer = CountVectorizer(token_pattern='\\b\\w+\\b')
 # norm=None对词频结果不归一化（整数），默认归一化（小数）
 # use_idf=False, 因为使用的是计算tfidf的函数, 所以要忽略idf的计算；默认计算 tf-idf

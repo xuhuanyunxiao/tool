@@ -52,11 +52,12 @@ ls -l
 那么执行 ls -l /a/b 查看权限的文件并不是b，而是查看的c的权限。
 
 ls -l /a 查看的是b文件的权限
-
 ls -l /a/b 查看的是c文件的权限
-
 ls -l /a/b/c 查看的是c文件的权限
 
+# 显示隐藏文件
+l.（这是个命令别名，实际命令为ls -d .* --color=auto）
+# 显示当前目录下的所有隐藏文件，只显示名称，不显示详情
 
 # 查找
 (1)find命令是根据文件的属性进行查找，如文件名，文件大小，所有者，所属组，是否为空，访问时间，修改时间等。 
@@ -116,6 +117,9 @@ cat /proc/cpuinfo| grep "processor"| wc -l
  查看CPU信息（型号）
 cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c
 
+# 查使用CPU最多的K个进程
+ps -aux | sort -k3nr | head -K
+
 
 #%% -----------------  GPU
 # 显卡型号
@@ -143,15 +147,33 @@ cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
 #%% -----------------  硬盘与内存
 free total -h
 
-Linux下查看硬盘及分区信息
+# Linux下查看硬盘及分区信息
 fdisk -l 
-文件系统的磁盘空间占用情况
+# 文件系统的磁盘空间占用情况
 df -h
-查看某目录的大小:
+# 查看某目录的大小:
 linuxidc@ubuntu:~$ du -sh 
-查看某目录下占用空间最多的文件或目录。取前10个。需要先进入该目录下。
+# 查看某目录下占用空间最多的文件或目录。取前10个。需要先进入该目录下。
 du -cks * | sort -rn | head -n 10
 
+#%% -----------------  内存
+free 
+free -m
+
+# 查使用内存最多的K个进程
+ps -aux | sort -k4nr | head -K
+# 如果是10个进程，K=10，如果是最高的三个，K=3
+# 说明：ps -aux中（a指代all——所有的进程，u指代userid——执行该进程的用户id，x指代显示所有程序，不以终端机来区分）
+#         ps -aux的输出格式如下：
+# USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# root         1  0.0  0.0  19352  1308 ?        Ss   Jul29   0:00 /sbin/init
+# root         2  0.0  0.0      0     0 ?        S    Jul29   0:00 [kthreadd]
+# root         3  0.0  0.0      0     0 ?        S    Jul29   0:11 [migration/0]
+# sort -k4nr中（k代表从第几个位置开始，后面的数字4即是其开始位置，结束位置如果没有，则默认到最后；
+# n指代numberic sort，根据其数值排序；
+# r指代reverse，这里是指反向比较结果，输出时默认从小到大，反向后从大到小。）。
+# 本例中，可以看到%MEM在第4个位置，根据%MEM的数值进行由大到小的排序。
+# head -K（K指代行数，即输出前几位的结果）
 
 #%% -----------------  进程与端口
 iostat：查看系统CUP、磁盘性能指标

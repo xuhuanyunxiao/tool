@@ -1,4 +1,4 @@
-hadoop £º
+﻿hadoop £º
 # cd /root/software/hadoop/hadoop-2.7.6
 # bin/hdfs namenode -format
 

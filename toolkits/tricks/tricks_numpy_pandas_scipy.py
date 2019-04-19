@@ -100,6 +100,7 @@ chunk = chunks.get_chunk(5)
 with pd.ExcelWriter(fea_filename) as writer:
     single_fea_desc.to_excel(writer,'各个特征')
     writer.save()
+
  
 
 # json  -----------------
@@ -136,6 +137,14 @@ writer = pd.ExcelWriter('Q3_data/circ_Q3_tendency_result_20181018_7.xlsx',
 
 useful_data.to_excel(writer, sheet_name='Sheet1', index = False)
 writer.save()
+
+# 利用pandas写入excel时，产生错误 'openpyxl.utils.exceptions.IllegalCharacterError'
+import xlsxwriter
+writer = pandas.ExcelWriter(filename + '.xlsx',engine='xlsxwriter')
+useful_data.to_excel(writer, sheet_name='Sheet1')
+writer.save()
+
+
 
 id_list = tuple(day_id_1['id'].tolist())
 

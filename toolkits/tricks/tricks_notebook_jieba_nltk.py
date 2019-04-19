@@ -358,6 +358,10 @@ wnl = WordNetLemmatizer()
 print(wnl.lemmatize('countries'))  
 
 # Remove Stop Words 去除停用词  ----------------------
+nltk.corpus.stopwords.words('english')
+nltk.corpus.stopwords.words('French')
+
+
 from nltk.corpus import stopwords   #去停用词
 print('-- 1 ', sent_tokenize_list[0])
 word_tokenize_list = word_tokenize(sent_tokenize_list[0])  
