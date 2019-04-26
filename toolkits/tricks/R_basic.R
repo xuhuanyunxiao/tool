@@ -1,9 +1,21 @@
 
 
 #%% -----------------     安装与导入  ----------------------
+# 通过如下命令设定镜像
+options(repos = 'http://mirrors.ustc.edu.cn/CRAN/')
+# 查看镜像是否修改
+getOption('repos')
+
 # 安装与导入package
+install.packages("pastecs")
+remove.packages (c("pkg1" ,"pkg2") ,   # 卸载
+			lib = file.path("path" , "to" , "library"))
+
 if(!require(pastecs)){install.packages("pastecs")}
 library('arules')
+
+.libPaths()  # 能够显示库所在的位置， 
+library()    # 可以显示库中有哪些包。
 
 # 导入数据集
 # R在datasets包中共提供了100个可以使用的数据集，这些数据集都可以通过 data() 函数加载入内存。
