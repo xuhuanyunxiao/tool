@@ -45,6 +45,21 @@ python setup.py develop
 而是在”site-packages”目录里创建一个指向当前应用位置的链接。
 这样如果当前位置的源码被改动，就会马上反映到”site-packages”里。
 
+# 版本回退
+git log # 查找 head
+git reset --hard head
+
+# 查出项目中所有大于40M的文件
+find ./ -size +99M 
+
+# 上传大文件（超过100M）
+# git lfs install
+git lfs track “* .gif” --这里的 “ *.gif "就是你要上传的大文件的路径
+git add .gitattributes
+git add demo.gif
+git commit -m "提交项目演示gif图"
+git push
+
 
 
 #%% -----------------     conda  ----------------------

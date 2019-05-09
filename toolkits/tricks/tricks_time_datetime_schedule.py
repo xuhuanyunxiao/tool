@@ -231,3 +231,90 @@ schedule.every().wednesday.at("13:15").do(job)  #每周三下午1点14分执行�
 while True:
     schedule.run_pending()
     time.sleep(1)
+
+
+
+#%% -----------------     TimeSeries  ------------------
+import pandas as pd
+import numpy as np
+
+rng = pd.date_range('2016 Jul 1', periods = 10, freq = 'D')
+pd.Timestamp('2016-07-10 10:15')
+
+# TIME SPANS
+pd.Period('2016-01')
+pd.Period('2016-01-01 10')
+
+# TIME OFFSETS
+pd.Timedelta('1 day')
+
+pd.Period('2016-01-01 10:10') + pd.Timedelta('1 day')
+pd.Timestamp('2016-01-01 10:10') + pd.Timedelta('1 day')
+pd.Timestamp('2016-01-01 10:10') + pd.Timedelta('15 ns')
+
+# FANCY FREQUENCY SETTING
+# Only want business days
+pd.period_range('2016-01-01 10:10', freq = 'B', periods = 10)
+
+# It's possible to combine frequencies. What if you want to advance by 25 hours each day. 
+# What are the 2 ways to do it?
+p1 = pd.period_range('2016-01-01 10:10', freq = '25H', periods = 10)
+p2 = pd.period_range('2016-01-01 10:10', freq = '1D1H', periods = 10)
+
+# INDEXING WITH TIME OBJECTS
+# You can use these objects for indices
+# Let's start with using a date range as above
+rng = pd.date_range('2016 Jul 1', periods = 10, freq = 'D')
+pd.Series(range(len(rng)), index = rng)
+
+# Timestamped data can be convereted to period indices with to_period and vice versa with to_timestamp
+ts = pd.Series(range(10), pd.date_range('07-10-16 8:00', periods = 10, freq = 'H'))
+ts_period = ts.to_period()
+ts_period['2016-07-10 08:30':'2016-07-10 11:45'] # we have the concept of overlap with time periods
+ts['2016-07-10 08:30':'2016-07-10 11:45'] # we have the concept of include with timestamps
+
+# 时区
+rng_tz = pd.date_range('3/6/2012 00:00', periods = 15, freq = 'D', tz = 'Europe/London')
+from pytz import common_timezones, all_timezones
+print(len(common_timezones))
+print(len(all_timezones))
+print(set(all_timezones) - set(common_timezones))
+
+# You can also localize a naive timestamp
+t_naive = pd.Timestamp('2016-07-10 08:50')
+t = t_naive.tz_localize(tz = 'US/Central')
+t.tz_convert('Asia/Tokyo')
+
+# Let's experiment with truncate convenience function
+ts = pd.Series(range(10), index = pd.date_range('7/31/2015', freq = 'M', periods = 10))
+ts.truncate(before='10/31/2015', after='12/31/2015')
+
+# Resampling
+rng = pd.date_range('1/1/2011', periods=72, freq='H')
+ts = pd.Series(np.random.randn(len(rng)), index=rng)
+converted = ts.asfreq('45Min', method='pad')
+ts.resample('D').sum()
+
+# Moving Window Functions
+df = pd.DataFrame(np.random.randn(600, 3), 
+                  index = pd.date_range('7/1/2016', freq = 'S', periods = 600), 
+                  columns = ['A', 'B', 'C'])
+
+#pd.rolling_mean(df, window = 2)[1:10] # in future versions you want to resample separately
+r = df.rolling(window = 10)
+# r.agg, r.apply, r.count, r.exclusions, r.max, r.median, r.name, r.quantile, 
+# r.kurt, r.cov, r.corr, r.aggregate, r.std, r.skew, r.sum, r.var
+df.plot(style = 'k--')
+r.mean().plot(style = 'k')
+
+df = df.cumsum()
+df.rolling(window = 50).sum().plot(subplots=True)
+
+# What about a custom function?
+df.rolling(window = 10).apply(lambda x: np.fabs(x - x.mean()).mean())
+
+# Expanding windows
+# Yields the value of the statistic with all the data available up to that point in time
+df.expanding(min_periods = 1).mean()[1:5]
+
+
