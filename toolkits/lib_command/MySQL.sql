@@ -239,6 +239,10 @@ SELECT *
 	FROM pom.wise_class_tree_node_keyword t 
 		where locate('中国人寿', t.query_or) ;
 
+SELECT *
+FROM concept_classified t
+WHERE t.concept_name like '%5G%';
+
 
 # 限定行数 limit
 select user_name, user_phone, 教学方法（可多选） 
